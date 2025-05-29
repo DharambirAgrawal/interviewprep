@@ -2,16 +2,17 @@ import { upload } from "./app";
 import { Application, Request, Response, NextFunction } from "express";
 import { AppError } from "./errors/AppError";
 import { errorHandler } from "./middlewares/ErrorHandler";
-import { blogRouter } from "./api/blog/blog.routes";
-
+import { serviceRouter } from "./api/service/service.routes";
+import { authRouter } from "./api/auth/auth.routes";
 
 // Define routes function with proper typing for Express app
 const routes = (app: Application): void => {
   // Example route using the upload middleware
 
-  app.use("/api/blog", blogRouter);
-//   app.use("/api/media", upload.any(), mediaRouter);
+  app.use("/api/service", upload.single("file"), serviceRouter);
+  app.use("/api/auth", authRouter);
 
+  //   app.use("/api/media", upload.any(), mediaRouter);
 
   // Catch-all for undefined routes with AppError
   app.all("*", (req: Request, res: Response, next: NextFunction): void => {
