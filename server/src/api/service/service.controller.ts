@@ -91,22 +91,74 @@ export const generate_questions = async (req: Request, res: Response) => {
 };
 
 export const code_compile = async (req: Request, res: Response) => {
-  const response = await fetch(process.env.JUDGE0_API!, {
-    method: "POST",
-    body: JSON.stringify({
-      // @ts-ignore
-      source_code: req.body.source_code,
-      language_id: req.body.language_id,
-      stdin: req.body.stdin || "",
-    }),
-    headers: {
-      "Content-Type": "application/json",
-      "X-RapidAPI-Key": process.env.JUDGE0_API_KEY!,
-      "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
-    },
-  });
+  const { language, code, stdin } = req.body;
+  if (!language || !code) {
+    throw new AppError("Language and code are required!", 400);
+  }
+  const languageMap: Record<string, number> = {
+    cpp: 54,
+    python: 28,
+    javascript: 63,
+    java: 62,
+    go: 60,
+    typescript: 74,
+    ruby: 72,
+    csharp: 51,
+    bash: 46,
+  };
 
+  const languageId = languageMap[language];
+  if (!languageId) {
+    throw new AppError("Unsupported language selected", 400);
+  }
+  const url =
+    "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true";
+
+  const options = {
+    method: "POST",
+    headers: {
+      "x-rapidapi-key": "b4ca42b689msh8d2c931b57fb41cp1edd10jsn080642bd03b3",
+      "x-rapidapi-host": "judge0-extra-ce.p.rapidapi.com",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      language_id: languageId,
+      source_code: code,
+      stdin: "",
+    }),
+  };
+  const response = await fetch(url, options);
   if (!response.ok) {
     throw new AppError("Failed to compile code!", 500);
   }
+  const data = await response.json();
+  res.status(response.status).json({
+    status: "success",
+    data,
+  });
 };
+
+// {
+//   stdout: null,
+//   time: '0.082',
+//   memory: 27724,
+//   stderr: '  File "/box/script.py", line 3\n' +
+//     '    for i in range(10)\n' +
+//     '    print(i)\n' +
+//     '                      \n' +
+//     "SyntaxError: expected ':'\n",
+//   token: '8fa26ea3-e540-45c5-bed3-0e1f370a9011',
+//   compile_output: null,
+//   message: 'Exited with error status 1',
+//   status: { id: 11, description: 'Runtime Error (NZEC)' }
+// }
+// {
+//   stdout: '0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n',
+//   time: '0.043',
+//   memory: 26676,
+//   stderr: null,
+//   token: 'cb111bb6-b05a-4d87-af05-2438b5a9360f',
+//   compile_output: null,
+//   message: null,
+//   status: { id: 3, description: 'Accepted' }
+// }

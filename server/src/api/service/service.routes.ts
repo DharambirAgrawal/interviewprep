@@ -4,6 +4,7 @@ import {
   audio_to_text,
   generate_questions,
   resume_to_text,
+  code_compile,
 } from "./service.controller";
 
 const ServiceRouter = express.Router();
@@ -14,5 +15,5 @@ export const serviceRouter = ServiceRouter.post(
 )
 
   .post("/resume-text", catchAsync(resume_to_text))
-  .post("/generate-question", catchAsync(generate_questions));
-// .post("/reset-password",catchAsync(resetPassword))
+  .post("/generate-question", catchAsync(generate_questions))
+  .post("/code-compile", catchAsync(code_compile));
