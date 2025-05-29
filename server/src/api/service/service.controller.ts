@@ -95,34 +95,19 @@ export const code_compile = async (req: Request, res: Response) => {
   if (!language || !code) {
     throw new AppError("Language and code are required!", 400);
   }
-  const languageMap: Record<string, number> = {
-    cpp: 54,
-    python: 28,
-    javascript: 63,
-    java: 62,
-    go: 60,
-    typescript: 74,
-    ruby: 72,
-    csharp: 51,
-    bash: 46,
-  };
 
-  const languageId = languageMap[language];
-  if (!languageId) {
-    throw new AppError("Unsupported language selected", 400);
-  }
   const url =
     "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true";
 
   const options = {
     method: "POST",
     headers: {
-      "x-rapidapi-key": "b4ca42b689msh8d2c931b57fb41cp1edd10jsn080642bd03b3",
-      "x-rapidapi-host": "judge0-extra-ce.p.rapidapi.com",
+      "x-rapidapi-key": process.env.JUDGE0_API_KEY,
+      "x-rapidapi-host": process.env.JUDGE0_API_URL,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      language_id: languageId,
+      language_id: language,
       source_code: code,
       stdin: "",
     }),

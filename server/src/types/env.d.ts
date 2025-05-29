@@ -5,5 +5,7 @@ declare namespace NodeJS {
     CLOUDINARY_CLOUD_NAME: string;
     PYTHON_API_SECRET: string;
     PYTHON_API_URL: string;
+    JUDGE0_API_KEY: string;
+    JUDGE0_API_URL: string;
   }
 }

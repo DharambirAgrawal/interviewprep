@@ -10,17 +10,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { X, Download, Trash2 } from "lucide-react";
+import { LANGUAGES, LANGUAGE_CONFIG } from "@/lib/data";
+import { codeCompile } from "./actions";
 
-type LanguageOption =
-  | "cpp"
-  | "python"
-  | "javascript"
-  | "java"
-  | "go"
-  | "typescript"
-  | "ruby"
-  | "csharp"
-  | "bash";
+// Language mapping for Monaco Editor and file extensions
 
 interface CodeEditorProps {
   setIsCodeEditorOpen: (isOpen: boolean) => void;
@@ -28,7 +21,7 @@ interface CodeEditorProps {
 
 export default function CodeEditor({ setIsCodeEditorOpen }: CodeEditorProps) {
   const [code, setCode] = useState("// Write your code here");
-  const [language, setLanguage] = useState<LanguageOption>("cpp");
+  const [language, setLanguage] = useState("2"); // Default to C++ (Clang 10.0.1)
   const [output, setOutput] = useState<{
     stdout: string | null;
     stderr: string | null;
@@ -46,16 +39,7 @@ export default function CodeEditor({ setIsCodeEditorOpen }: CodeEditorProps) {
   const handleRun = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(
-        "http://localhost:8080/api/service/code-compile",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ language, code }),
-        }
-      );
-      const data = await response.json();
-      console.log(data);
+      const data = await codeCompile(language, code);
       setOutput(
         data.data || {
           stdout: null,
@@ -80,17 +64,9 @@ export default function CodeEditor({ setIsCodeEditorOpen }: CodeEditorProps) {
   };
 
   const handleDownload = () => {
-    const fileExtension = {
-      cpp: "cpp",
-      python: "py",
-      javascript: "js",
-      java: "java",
-      go: "go",
-      typescript: "ts",
-      ruby: "rb",
-      csharp: "cs",
-      bash: "sh",
-    }[language];
+    const languageId = parseInt(language);
+    const config = LANGUAGE_CONFIG[languageId as keyof typeof LANGUAGE_CONFIG];
+    const fileExtension = config?.extension || "txt";
 
     const blob = new Blob([code], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -99,6 +75,12 @@ export default function CodeEditor({ setIsCodeEditorOpen }: CodeEditorProps) {
     a.download = `code.${fileExtension}`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const getMonacoLanguage = () => {
+    const languageId = parseInt(language);
+    const config = LANGUAGE_CONFIG[languageId as keyof typeof LANGUAGE_CONFIG];
+    return config?.monaco || "plaintext";
   };
 
   const handleMouseMove = (e: MouseEvent) => {
@@ -171,25 +153,15 @@ export default function CodeEditor({ setIsCodeEditorOpen }: CodeEditorProps) {
           <div className="flex items-center gap-4">
             <Select
               value={language}
-              onValueChange={(value) => setLanguage(value as LanguageOption)}
+              onValueChange={(value) => setLanguage(value)}
             >
-              <SelectTrigger className="w-[160px] bg-gray-700 text-gray-200 border border-gray-600">
+              <SelectTrigger className="w-[200px] bg-gray-700 text-gray-200 border border-gray-600">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 text-gray-200">
-                {[
-                  "cpp",
-                  "python",
-                  "javascript",
-                  "java",
-                  "go",
-                  "typescript",
-                  "ruby",
-                  "csharp",
-                  "bash",
-                ].map((lang) => (
-                  <SelectItem key={lang} value={lang}>
-                    {lang.charAt(0).toUpperCase() + lang.slice(1)}
+              <SelectContent className="bg-gray-800 text-gray-200 max-h-60 overflow-y-auto">
+                {LANGUAGES.map((lang) => (
+                  <SelectItem key={lang.id} value={String(lang.id)}>
+                    {lang.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -240,7 +212,7 @@ export default function CodeEditor({ setIsCodeEditorOpen }: CodeEditorProps) {
 
         <Editor
           height={`${editorHeight}%`}
-          language={language}
+          language={getMonacoLanguage()}
           value={code}
           onChange={(val) => setCode(val || "")}
           theme="vs-dark"
