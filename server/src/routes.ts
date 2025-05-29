@@ -9,13 +9,14 @@ import { authRouter } from "./api/auth/auth.routes";
 const routes = (app: Application): void => {
   // Example route using the upload middleware
 
-  app.use("/api/service", upload.single("file"), serviceRouter);
+  app.use("/api/service", serviceRouter);
   app.use("/api/auth", authRouter);
 
   //   app.use("/api/media", upload.any(), mediaRouter);
 
   // Catch-all for undefined routes with AppError
-  app.all("*", (req: Request, res: Response, next: NextFunction): void => {
+  app.all(/.*/, (req: Request, res: Response, next: NextFunction) => {
+    console.log("kkkkkkkkkkkkkkkkkk");
     throw new AppError(`Can't find ${req.originalUrl} on this server!`, 404);
   });
 

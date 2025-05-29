@@ -5,7 +5,7 @@ import { login, signup } from "./auth.controller";
 const AuthRouter = express.Router();
 
 export const authRouter = AuthRouter.post("/login", catchAsync(login)).post(
-  "/sighup",
+  "/signup",
   catchAsync(signup)
 );
 // .post("/reset-password",catchAsync(resetPassword))

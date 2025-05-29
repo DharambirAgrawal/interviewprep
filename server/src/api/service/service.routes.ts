@@ -9,7 +9,7 @@ import {
 const ServiceRouter = express.Router();
 
 export const serviceRouter = ServiceRouter.post(
-  "/stt",
+  "/strrt",
   catchAsync(audio_to_text)
 )
 

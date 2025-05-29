@@ -1,4 +1,4 @@
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
 import { AppError } from "../errors/AppError";
 
 /**
@@ -22,7 +22,7 @@ export function generateToken(
   expiresInMinutes: number = 5
 ): string {
   // Define expiration time
-  const options = { expiresIn: `${expiresInMinutes}m` };
+  const options: SignOptions = { expiresIn: `${expiresInMinutes}m` };
 
   // Generate and return the token
   return jwt.sign(payload, secret, options);
