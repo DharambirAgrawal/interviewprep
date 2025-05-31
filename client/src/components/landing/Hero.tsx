@@ -97,15 +97,15 @@ export const Hero = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-3xl blur-2xl opacity-20 scale-110"></div>
 
               <div className="relative p-4 bg-white rounded-3xl shadow-2xl">
-                {/* <Image
-                  src={heroImg}
+                <Image
+                  src="/landing/hero.webp"
                   width="616"
                   height="617"
                   className="object-cover rounded-2xl"
                   alt="AI Interview Preparation Platform Dashboard"
                   loading="eager"
-                  placeholder="blur"
-                /> */}
+                  // placeholder="blur"
+                />
               </div>
 
               {/* Floating cards */}

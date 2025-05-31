@@ -6,9 +6,9 @@ import { Cta } from "@/components/landing/Cta";
 import { ContactForm } from "@/components/landing/ContactForm";
 import { benefitOne, benefitTwo } from "@/components/landing/data";
 import { ExpertTeam } from "@/components/landing/ExpertTeam";
-// import { TestimonialsSection } from "@/components/TestimonialsSection";
-// import { StatsSection } from "@/components/StatsSection";
-// import { FeaturesGrid } from "@/components/FeaturesGrid";
+import { TestimonialsSection } from "@/components/landing/TestimonialSection";
+import { StatsSection } from "@/components/landing/StatsSection";
+import { FeaturesGrid } from "@/components/landing/FeaturesGrid";
 
 export default function Home() {
   return (
@@ -17,7 +17,7 @@ export default function Home() {
       <Hero />
 
       {/* Stats Section - Build Trust */}
-      {/* <StatsSection /> */}
+      <StatsSection />
 
       {/* Platform Benefits */}
       <section className="py-20 lg:py-28">
@@ -33,7 +33,7 @@ export default function Home() {
         </SectionTitle>
 
         {/* Feature Grid */}
-        {/* <FeaturesGrid /> */}
+        <FeaturesGrid />
 
         {/* Detailed Benefits */}
         <div className="mt-20 space-y-20">
@@ -43,7 +43,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      {/* <TestimonialsSection /> */}
+      <TestimonialsSection />
 
       {/* Expert Team Section */}
       <section className="py-20 lg:py-28 bg-gradient-to-br from-slate-50 to-blue-50/30">
