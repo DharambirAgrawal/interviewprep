@@ -1,3 +1,36 @@
+export const APP_NAME = "PrepAI"; // A name suitable for AI interview preparation
+
+export const ABOUT =
+  "PrepAI is your ultimate companion for AI and Machine Learning interview preparation. Practice coding, theory, system design, and real-world case studies crafted by industry experts.";
+
+export const DEVELOPER = {
+  name: "DevInnovators",
+  link: "https://yourportfolio.dev", // Replace with your actual developer link
+};
+
+export const navigation = [
+  {
+    name: "Home",
+    link: "#home",
+  },
+  {
+    name: "Practice",
+    link: "#practice",
+  },
+  {
+    name: "Topics",
+    link: "#topics",
+  },
+  {
+    name: "Mock Interviews",
+    link: "#mock-interviews",
+  },
+  {
+    name: "Contact",
+    link: "#contact",
+  },
+];
+
 export const LANGUAGES = [
   {
     id: 11,
