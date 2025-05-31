@@ -7,7 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -38,57 +37,56 @@ import { useForm } from "react-hook-form";
 // import { Toaster } from "@/components/ui/toaster";
 
 const formSchema = z.object({
-  fullName: z.string().min(2, {
-    message: "Full name must be at least 2 characters.",
+  firstName: z.string().min(2, {
+    message: "First name must be at least 2 characters.",
   }),
-  email: z.string().email({
-    message: "Please enter a valid email address.",
+  lastName: z.string().min(2, {
+    message: "Last name must be at least 2 characters.",
   }),
-  phone: z.string().min(10, {
-    message: "Please enter a valid phone number.",
+  resume: z.custom<FileList>(
+    (val) => {
+      return (
+        typeof FileList !== "undefined" &&
+        val instanceof FileList &&
+        val.length > 0
+      );
+    },
+    {
+      message: "Resume is required",
+    }
+  ),
+  targetIndustry: z.string().min(1, {
+    message: "Please select your target industry.",
   }),
-  resume: z.instanceof(FileList).refine((files) => {
-    return files.length > 0;
-  }, "Resume is required"),
-  yearsOfExperience: z.string().min(1, {
-    message: "Please select your years of experience.",
+  jobTitle: z.string().min(1, {
+    message: "Please enter your current job title.",
   }),
-  fieldType: z.string().min(1, {
-    message: "Please select your field.",
-  }),
-  preferredRole: z.string().min(1, {
-    message: "Please enter your preferred role.",
-  }),
+
   interviewDifficulty: z.string().min(1, {
     message: "Please select your preferred difficulty level.",
   }),
-  specificTechnologies: z.string(),
-  availabilityTimeFrame: z.string().min(1, {
-    message: "Please select your availability.",
-  }),
-  portfolioLink: z
-    .string()
-    .url({
-      message: "Please enter a valid URL.",
-    })
-    .optional()
-    .or(z.literal("")),
-  linkedinProfile: z
-    .string()
-    .url({
-      message: "Please enter a valid URL.",
-    })
-    .optional()
-    .or(z.literal("")),
-  githubProfile: z
-    .string()
-    .url({
-      message: "Please enter a valid URL.",
-    })
-    .optional()
-    .or(z.literal("")),
+  availabilityTimeFrame: z.string().optional(),
+  remotePreference: z.boolean().optional(),
   additionalNotes: z.string().max(500).optional(),
-  remotePreference: z.boolean(),
+
+  // ✅ New fields
+  interviewTypes: z.array(z.string()).min(1, {
+    message: "Select at least one interview type.",
+  }),
+  interviewStyle: z.string().min(1, {
+    message: "Please select your preferred interview style.",
+  }),
+  primarySkills: z.string().min(1, {
+    message: "Please enter at least one primary skill.",
+  }),
+  weakAreas: z.string().optional(),
+  interviewComfortLevel: z.string().refine(
+    (val) => {
+      const num = parseInt(val);
+      return !isNaN(num) && num >= 1 && num <= 10;
+    },
+    { message: "Comfort level must be between 1 and 10." }
+  ),
 });
 
 export default function OnboardingPage() {
@@ -98,20 +96,22 @@ export default function OnboardingPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullName: "",
-      email: "",
-      phone: "",
-      yearsOfExperience: "",
-      fieldType: "",
-      preferredRole: "",
+      firstName: "",
+      lastName: "",
+      resume: undefined,
+      targetIndustry: "",
+      jobTitle: "",
       interviewDifficulty: "",
-      specificTechnologies: "",
       availabilityTimeFrame: "",
-      portfolioLink: "",
-      linkedinProfile: "",
-      githubProfile: "",
-      additionalNotes: "",
       remotePreference: false,
+      additionalNotes: "",
+
+      // New fields
+      interviewTypes: [],
+      interviewStyle: "",
+      primarySkills: "",
+      weakAreas: "",
+      interviewComfortLevel: "",
     },
   });
 
@@ -141,6 +141,7 @@ export default function OnboardingPage() {
       setIsSubmitting(false);
     }
   }
+  console.log(form.formState.errors);
 
   return (
     <div className="container mx-auto py-10">
@@ -174,54 +175,30 @@ export default function OnboardingPage() {
                   <div className="space-y-4">
                     <FormField
                       control={form.control}
-                      name="fullName"
+                      name="firstName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Full Name</FormLabel>
+                          <FormLabel>First Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="John Doe" {...field} />
+                            <Input placeholder="John" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email Address</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="email"
-                                placeholder="john.doe@example.com"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="phone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Phone Number</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="+1 (555) 123-4567"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                    <FormField
+                      control={form.control}
+                      name="lastName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Last Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="doe" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
                     <FormField
                       control={form.control}
@@ -246,6 +223,12 @@ export default function OnboardingPage() {
                         </FormItem>
                       )}
                     />
+                    {form.getValues("resume") &&
+                      form.getValues("resume").length > 0 && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Selected: {form.getValues("resume")[0].name}
+                        </p>
+                      )}
 
                     <div className="flex justify-end">
                       <Button
@@ -262,172 +245,30 @@ export default function OnboardingPage() {
                   <div className="space-y-4">
                     <FormField
                       control={form.control}
-                      name="yearsOfExperience"
+                      name="targetIndustry"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Years of Experience</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select experience level" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="0-1">0-1 years</SelectItem>
-                              <SelectItem value="1-3">1-3 years</SelectItem>
-                              <SelectItem value="3-5">3-5 years</SelectItem>
-                              <SelectItem value="5-10">5-10 years</SelectItem>
-                              <SelectItem value="10+">10+ years</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="fieldType"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Field</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select your field" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectGroup>
-                                <SelectItem value="frontend">
-                                  Frontend Development
-                                </SelectItem>
-                                <SelectItem value="backend">
-                                  Backend Development
-                                </SelectItem>
-                                <SelectItem value="fullstack">
-                                  Full Stack Development
-                                </SelectItem>
-                                <SelectItem value="mobile">
-                                  Mobile Development
-                                </SelectItem>
-                                <SelectItem value="devops">DevOps</SelectItem>
-                                <SelectItem value="data">
-                                  Data Science
-                                </SelectItem>
-                                <SelectItem value="ml">
-                                  Machine Learning
-                                </SelectItem>
-                                <SelectItem value="cloud">
-                                  Cloud Engineering
-                                </SelectItem>
-                                <SelectItem value="security">
-                                  Security
-                                </SelectItem>
-                                <SelectItem value="other">Other</SelectItem>
-                              </SelectGroup>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="preferredRole"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Preferred Role</FormLabel>
+                          <FormLabel>Target Industry</FormLabel>
                           <FormControl>
-                            <Input
-                              placeholder="e.g., Senior React Developer"
-                              {...field}
-                            />
+                            <Input placeholder="Tech" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-
                     <FormField
                       control={form.control}
-                      name="specificTechnologies"
+                      name="jobTitle"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Technologies/Skills</FormLabel>
+                          <FormLabel>Job Role/Title You're Targeting</FormLabel>
                           <FormControl>
-                            <Textarea
-                              placeholder="List specific technologies and skills you're proficient in (e.g., React, Node.js, Python, AWS)"
-                              {...field}
-                            />
+                            <Input placeholder="Software Engineer" {...field} />
                           </FormControl>
-                          <FormDescription>
-                            Separate multiple technologies with commas
-                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="portfolioLink"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Portfolio URL</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="https://yourportfolio.com"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="linkedinProfile"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>LinkedIn Profile</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="https://linkedin.com/in/username"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="githubProfile"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>GitHub Profile</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="https://github.com/username"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
 
                     <div className="flex justify-between">
                       <Button
@@ -484,39 +325,67 @@ export default function OnboardingPage() {
 
                     <FormField
                       control={form.control}
-                      name="availabilityTimeFrame"
+                      name="interviewTypes"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Availability Time Frame</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
+                          <FormLabel>
+                            Type of Interview You Want to Practice
+                          </FormLabel>
+                          <div className="space-y-2">
                             <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select your availability" />
-                              </SelectTrigger>
+                              <div className="flex flex-col space-y-2">
+                                {[
+                                  "behavioral",
+                                  "technical",
+                                  "systemDesign",
+                                  "caseStudy",
+                                  "productStrategy",
+                                  "whiteboardCoding",
+                                  "hrCultureFit",
+                                ].map((type) => (
+                                  <div
+                                    key={type}
+                                    className="flex items-center space-x-2"
+                                  >
+                                    <Checkbox
+                                      checked={field.value.includes(type)}
+                                      onCheckedChange={(checked) => {
+                                        if (checked) {
+                                          field.onChange([
+                                            ...field.value,
+                                            type,
+                                          ]);
+                                        } else {
+                                          field.onChange(
+                                            field.value.filter(
+                                              (value: string) => value !== type
+                                            )
+                                          );
+                                        }
+                                      }}
+                                    />
+                                    <label className="text-sm">
+                                      {type === "behavioral"
+                                        ? "Behavioral"
+                                        : type === "technical"
+                                        ? "Technical"
+                                        : type === "systemDesign"
+                                        ? "System Design"
+                                        : type === "caseStudy"
+                                        ? "Case Study"
+                                        : type === "productStrategy"
+                                        ? "Product/Strategy"
+                                        : type === "whiteboardCoding"
+                                        ? "Whiteboard Coding"
+                                        : "HR / Culture Fit"}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
                             </FormControl>
-                            <SelectContent>
-                              <SelectItem value="immediate">
-                                Immediately
-                              </SelectItem>
-                              <SelectItem value="1week">
-                                Within 1 week
-                              </SelectItem>
-                              <SelectItem value="2weeks">
-                                Within 2 weeks
-                              </SelectItem>
-                              <SelectItem value="1month">
-                                Within 1 month
-                              </SelectItem>
-                              <SelectItem value="3months">
-                                Within 3 months
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
+                          </div>
                           <FormDescription>
-                            When would you like to start practicing interviews?
+                            Choose one or more types you'd like to practice.
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -525,24 +394,98 @@ export default function OnboardingPage() {
 
                     <FormField
                       control={form.control}
-                      name="remotePreference"
+                      name="interviewStyle"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormItem>
+                          <FormLabel>Preferred Interview Style</FormLabel>
                           <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a style" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="mock">
+                                  1-on-1 Mock Interview
+                                </SelectItem>
+                                <SelectItem value="timed">Timed Q&A</SelectItem>
+                                <SelectItem value="chat">Chat-based</SelectItem>
+                                <SelectItem value="voice">
+                                  Voice-based
+                                </SelectItem>
+                                <SelectItem value="star">
+                                  STAR Format (Behavioral)
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="primarySkills"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Primary Skills You Want to Be Quizzed On
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="E.g. Python, SQL, Communication"
+                              {...field}
                             />
                           </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>
-                              Interested in remote positions
-                            </FormLabel>
-                            <FormDescription>
-                              Check this if you're looking for remote work
-                              opportunities
-                            </FormDescription>
-                          </div>
+                          <FormDescription>
+                            Separate multiple skills with commas
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="weakAreas"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Weak Areas to Focus On (Optional)
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Mention specific areas where you need more practice"
+                              className="min-h-[80px]"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="interviewComfortLevel"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Comfort Level (1–10) with Interviews
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min="1"
+                              max="10"
+                              placeholder="Rate from 1 (low) to 10 (high)"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
