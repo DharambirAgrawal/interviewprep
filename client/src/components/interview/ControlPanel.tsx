@@ -5,7 +5,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import MicroPhone from "./features/Microphone";
+import MicroPhone from "../features/Microphone";
 
 import {
   Video,

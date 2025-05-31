@@ -1,4 +1,4 @@
-import VideoCallInterface from "@/components/VideoCallInterface";
+import VideoCallInterface from "@/components/interview/VideoCallInterface";
 
 export default function Home() {
   return <VideoCallInterface />;
