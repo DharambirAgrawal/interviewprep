@@ -28,7 +28,7 @@ export function Navbar() {
           </div>
 
           {/* Desktop nav */}
-          <div className="hidden md:flex space-x-8">
+          <div className="hidden md:flex items-center space-x-8">
             {navigation.map((item, index) => (
               <Link
                 key={index}
@@ -38,6 +38,14 @@ export function Navbar() {
                 {item.name}
               </Link>
             ))}
+
+            {/* Main CTA Button */}
+            <Link
+              href="/onboarding"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 shadow-md hover:shadow-lg"
+            >
+              Get Started
+            </Link>
           </div>
 
           {/* Mobile toggle */}
@@ -92,11 +100,20 @@ export function Navbar() {
                 key={index}
                 href={item.link}
                 onClick={() => setMenuOpen(false)}
-                className="block text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium"
+                className="block text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium py-2"
               >
                 {item.name}
               </Link>
             ))}
+
+            {/* Mobile CTA Button */}
+            <Link
+              href="/onboarding"
+              onClick={() => setMenuOpen(false)}
+              className="block bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg font-medium transition-colors duration-200 text-center mt-4"
+            >
+              Get Started
+            </Link>
           </div>
         </div>
       )}
