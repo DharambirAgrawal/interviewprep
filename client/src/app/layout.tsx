@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import DefaultLayout from "./DefaultLayout";
 
 import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -19,13 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        <Navbar />
-        <div className=" sm:px-10" id="Home">
-          {children}
-        </div>
-        <Footer />
-      </body>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }

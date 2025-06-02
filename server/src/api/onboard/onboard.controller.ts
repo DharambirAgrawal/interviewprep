@@ -1,11 +1,8 @@
 import { Request, Response } from "express";
 import { AppError } from "../../errors/AppError";
 import { Users } from "../../database/user"; // Your in-memory storage
-import { extractTextFromResume } from "../../utils/resumeParser"; // hypothetical utility
+// import { extractTextFromResume } from "../../utils/resumeParser"; // hypothetical utility
 import { v4 as uuidv4 } from "uuid";
-
-// In-memory store for demo
-export const onboardedUsers: any[] = [];
 
 export const user_onboarding = async (req: Request, res: Response) => {
   const {
@@ -33,11 +30,23 @@ export const user_onboarding = async (req: Request, res: Response) => {
   }
 
   // Handle resume file
+  if (
+    !req.files ||
+    (Array.isArray(req.files) && req.files.length === 0) ||
+    (!Array.isArray(req.files) && Object.keys(req.files).length === 0)
+  ) {
+    throw new AppError("No Resume found", 400);
+  }
+  const files = Array.isArray(req.files)
+    ? req.files
+    : Object.values(req.files).flat();
   const resumeFile = req.file;
+  console.log(files);
   let resumeText = "";
 
   if (resumeFile) {
-    resumeText = await extractTextFromResume(resumeFile);
+    // # send the resume to python backend
+    // resumeText = await extractTextFromResume(resumeFile);
   }
 
   const userData = {
@@ -58,7 +67,9 @@ export const user_onboarding = async (req: Request, res: Response) => {
   };
 
   // Store in memory
-  onboardedUsers.push(userData);
+  Users.push(userData);
+
+  console.log(Users);
 
   // Send back response
   res.status(201).json({
@@ -78,7 +89,7 @@ export const get_onboarded_user = async (req: Request, res: Response) => {
   const userId = req.params.id;
 
   // Find user in memory store
-  const user = onboardedUsers.find((u) => u.id === userId);
+  const user = Users.find((u) => u.id === userId);
 
   if (!user) {
     throw new AppError("User not found!", 404);

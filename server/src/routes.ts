@@ -12,7 +12,7 @@ const routes = (app: Application): void => {
 
   app.use("/api/auth", authRouter);
   app.use("/api/service", serviceRouter);
-  app.use("/api/onboard", upload.single("file"), onboardRouter);
+  app.use("/api/onboard", upload.any(), onboardRouter);
 
   //   app.use("/api/media", upload.any(), mediaRouter);
 

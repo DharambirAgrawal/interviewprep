@@ -11,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -33,8 +32,7 @@ import {
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-// import { toast } from "@/components/ui/use-toast";
-// import { Toaster } from "@/components/ui/toaster";
+import { handleOnboardingAction } from "./actions";
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
@@ -65,12 +63,10 @@ const formSchema = z.object({
   interviewDifficulty: z.string().min(1, {
     message: "Please select your preferred difficulty level.",
   }),
-  availabilityTimeFrame: z.string().optional(),
-  remotePreference: z.boolean().optional(),
   additionalNotes: z.string().max(500).optional(),
 
   // ✅ New fields
-  interviewTypes: z.array(z.string()).min(1, {
+  interviewType: z.string().min(1, {
     message: "Select at least one interview type.",
   }),
   interviewStyle: z.string().min(1, {
@@ -102,12 +98,8 @@ export default function OnboardingPage() {
       targetIndustry: "",
       jobTitle: "",
       interviewDifficulty: "",
-      availabilityTimeFrame: "",
-      remotePreference: false,
       additionalNotes: "",
-
-      // New fields
-      interviewTypes: [],
+      interviewType: "",
       interviewStyle: "",
       primarySkills: "",
       weakAreas: "",
@@ -120,6 +112,7 @@ export default function OnboardingPage() {
     try {
       // Normally you would make an API call here
       console.log(values);
+      const data = await handleOnboardingAction(values);
 
       // Simulating API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -141,10 +134,10 @@ export default function OnboardingPage() {
       setIsSubmitting(false);
     }
   }
-  console.log(form.formState.errors);
+  // console.log(form.formState.errors);
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto py-20">
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl text-center">
@@ -325,67 +318,54 @@ export default function OnboardingPage() {
 
                     <FormField
                       control={form.control}
-                      name="interviewTypes"
+                      name="interviewType" // Use singular form, since only one type is allowed
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
                             Type of Interview You Want to Practice
                           </FormLabel>
-                          <div className="space-y-2">
-                            <FormControl>
-                              <div className="flex flex-col space-y-2">
-                                {[
-                                  "behavioral",
-                                  "technical",
-                                  "systemDesign",
-                                  "caseStudy",
-                                  "productStrategy",
-                                  "whiteboardCoding",
-                                  "hrCultureFit",
-                                ].map((type) => (
-                                  <div
-                                    key={type}
-                                    className="flex items-center space-x-2"
-                                  >
-                                    <Checkbox
-                                      checked={field.value.includes(type)}
-                                      onCheckedChange={(checked) => {
-                                        if (checked) {
-                                          field.onChange([
-                                            ...field.value,
-                                            type,
-                                          ]);
-                                        } else {
-                                          field.onChange(
-                                            field.value.filter(
-                                              (value: string) => value !== type
-                                            )
-                                          );
-                                        }
-                                      }}
-                                    />
-                                    <label className="text-sm">
-                                      {type === "behavioral"
-                                        ? "Behavioral"
-                                        : type === "technical"
-                                        ? "Technical"
-                                        : type === "systemDesign"
-                                        ? "System Design"
-                                        : type === "caseStudy"
-                                        ? "Case Study"
-                                        : type === "productStrategy"
-                                        ? "Product/Strategy"
-                                        : type === "whiteboardCoding"
-                                        ? "Whiteboard Coding"
-                                        : "HR / Culture Fit"}
-                                    </label>
-                                  </div>
-                                ))}
-                              </div>
-                            </FormControl>
-                          </div>
+                          <FormControl>
+                            <div className="flex flex-col space-y-2">
+                              {[
+                                "behavioral",
+                                "technical",
+                                "systemDesign",
+                                "caseStudy",
+                                "productStrategy",
+                                "whiteboardCoding",
+                                "hrCultureFit",
+                              ].map((type) => (
+                                <label
+                                  key={type}
+                                  className="flex items-center space-x-2"
+                                >
+                                  <input
+                                    type="radio"
+                                    value={type}
+                                    checked={field.value === type}
+                                    onChange={() => field.onChange(type)}
+                                  />
+                                  <span className="text-sm">
+                                    {type === "behavioral"
+                                      ? "Behavioral"
+                                      : type === "technical"
+                                      ? "Technical"
+                                      : type === "systemDesign"
+                                      ? "System Design"
+                                      : type === "caseStudy"
+                                      ? "Case Study"
+                                      : type === "productStrategy"
+                                      ? "Product/Strategy"
+                                      : type === "whiteboardCoding"
+                                      ? "Whiteboard Coding"
+                                      : "HR / Culture Fit"}
+                                  </span>
+                                </label>
+                              ))}
+                            </div>
+                          </FormControl>
                           <FormDescription>
-                            Choose one or more types you'd like to practice.
+                            Choose the type you'd like to practice.
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
