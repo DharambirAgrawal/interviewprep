@@ -4,13 +4,15 @@ import { AppError } from "./errors/AppError";
 import { errorHandler } from "./middlewares/ErrorHandler";
 import { serviceRouter } from "./api/service/service.routes";
 import { authRouter } from "./api/auth/auth.routes";
+import { onboardRouter } from "./api/onboard/onboard.routes";
 
 // Define routes function with proper typing for Express app
 const routes = (app: Application): void => {
   // Example route using the upload middleware
 
-  app.use("/api/service", serviceRouter);
   app.use("/api/auth", authRouter);
+  app.use("/api/service", serviceRouter);
+  app.use("/api/onboard", upload.single("file"), onboardRouter);
 
   //   app.use("/api/media", upload.any(), mediaRouter);
 

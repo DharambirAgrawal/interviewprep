@@ -14,6 +14,6 @@ export const serviceRouter = ServiceRouter.post(
   catchAsync(audio_to_text)
 )
 
-  .post("/resume-text", catchAsync(resume_to_text))
-  .post("/generate-question", catchAsync(generate_questions))
+  // .post("/resume-text", catchAsync(resume_to_text))
+  // .post("/generate-question", catchAsync(generate_questions))
   .post("/code-compile", catchAsync(code_compile));
