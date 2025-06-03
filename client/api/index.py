@@ -50,6 +50,7 @@ from functions.resume_parser import extract_resume_text  # make sure this import
 
 app = Flask(__name__)
 API_KEY = os.getenv("SOME_SECRET")
+ENVIRONMENT = os.getenv("ENV", "development")
 
 @app.route("/api/test")
 def hello_world():
