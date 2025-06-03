@@ -82,5 +82,5 @@ def resume_api():
     finally:
         os.remove(tmp_path)
 
-if __name__ == "__main__":
-    app.run(port=5328, debug=True)
+# if __name__ == "__main__":
+#     app.run(port=5328, debug=True)
