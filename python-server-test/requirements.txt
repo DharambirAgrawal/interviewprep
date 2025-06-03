@@ -1,0 +1,23 @@
+# fastapi
+# uvicorn
+# whisper
+# # openai-whisper
+# # git+https://github.com/openai/whisper.git
+# google-generativeai
+# PyMuPDF
+# python-docx
+# pydantic
+# aiofiles
+# python-dotenv
+
+
+fastapi
+uvicorn
+# whisper  ❌ remove this line
+git+https://github.com/openai/whisper.git  # ✅ correct version
+google-generativeai
+PyMuPDF
+python-docx
+pydantic
+aiofiles
+python-dotenv
