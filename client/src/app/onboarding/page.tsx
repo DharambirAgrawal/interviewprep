@@ -110,8 +110,6 @@ export default function OnboardingPage() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     try {
-      // Normally you would make an API call here
-      console.log(values);
       const data = await handleOnboardingAction(values);
 
       // Simulating API call
