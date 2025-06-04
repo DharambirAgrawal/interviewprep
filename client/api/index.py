@@ -18,7 +18,6 @@ def hello_world():
 
 @app.route("/api/resume-text", methods=["POST"])
 def resume_api():
-    print(request.files)
     if 'resume' not in request.files:
         return {"error": "No file part in request"}, 400
 
