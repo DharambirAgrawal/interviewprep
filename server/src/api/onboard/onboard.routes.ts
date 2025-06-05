@@ -7,4 +7,4 @@ const OnboardRouter = express.Router();
 export const onboardRouter = OnboardRouter.post(
   "/user",
   catchAsync(user_onboarding)
-).get("/user:id", catchAsync(get_onboarded_user));
+).get("/user/:id", catchAsync(get_onboarded_user));

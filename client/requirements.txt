@@ -3,3 +3,6 @@ werkzeug==2.3.8
 PyMuPDF
 python-docx
 python-dotenv
+# git+https://github.com/openai/whisper.git
+openai-whisper
+imageio[ffmpeg]
