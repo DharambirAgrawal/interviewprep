@@ -1,11 +1,7 @@
 import os
-import subprocess
 import sys
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-import imageio_ffmpeg
-os.environ["PATH"] += os.pathsep + os.path.dirname(imageio_ffmpeg.get_ffmpeg_exe())
-
 
 from flask import Flask, request, jsonify
 import tempfile
@@ -48,33 +44,25 @@ def resume_api():
     finally:
         os.remove(tmp_path)
 
+
 @app.route("/api/audio-stream", methods=["POST"])
 def transcribe_audio():
     audio = request.files.get("audio")
     if not audio:
         return jsonify({"error": "No audio received"}), 400
 
+    ext = os.path.splitext(audio.filename)[1].lower()
+    if ext not in [".mp3", ".wav", ".m4a", ".webm"]:
+        return jsonify({"error": "Unsupported audio format"}), 400
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmpfile:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmpfile:
         audio.save(tmpfile.name)
 
     try:
-        print("....................... Transcribing audio .......................")
-        print("Uploaded audio filename:", audio.filename)
-        print("Content type:", audio.content_type)
-        print("Temp file path:", tmpfile.name)
-        print("File size:", os.path.getsize(tmpfile.name))
-        print("....................... Transcribing audio .......................")
+        result = model.transcribe(tmpfile.name, fp16=False)
 
         # result = model.transcribe(tmpfile.name)
-        
-        result = model.transcribe("Audio-Introduction-0.1.mp3")  # Can be mp3, wav, m4a, etc.
-
         text = result["text"]
-        # Print the transcribed text
-        print(result["text"])
-
-        # Optional: call Gemini API here with `text`
         print("Transcript:", text)
         return jsonify({"text": text})
     except Exception as e:
@@ -82,9 +70,6 @@ def transcribe_audio():
         return jsonify({"error": str(e)}), 500
     finally:
         os.unlink(tmpfile.name)
-
-
-
 
 
 if __name__ == "__main__":

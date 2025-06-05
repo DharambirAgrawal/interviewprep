@@ -1,5 +1,5 @@
 // // export default Microphone;
-// import React, { useState } from "react";
+// import React, { useState, useRef } from "react";
 // import {
 //   Tooltip,
 //   TooltipContent,
@@ -9,30 +9,55 @@
 // import { Mic, MicOff } from "lucide-react";
 
 // const Microphone = () => {
-//   const [isMuted, setIsMuted] = useState(true); // default to muted
-//   const [micStream, setMicStream] = useState<MediaStream | null>(null);
+//   const [isMuted, setIsMuted] = useState(true);
+//   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+//   const audioChunksRef = useRef<Blob[]>([]);
 
-//   const handleMicToggle = async () => {
-//     if (isMuted) {
-//       // Request microphone access
-//       try {
-//         const stream = await navigator.mediaDevices.getUserMedia({
-//           audio: true,
-//         });
-//         setMicStream(stream);
-//         setIsMuted(false);
-//       } catch (error) {
-//         console.error("Failed to access microphone:", error);
-//       }
-//     } else {
-//       // Stop microphone stream
-//       if (micStream) {
-//         micStream.getTracks().forEach((track) => track.stop());
-//         setMicStream(null);
-//       }
-//       setIsMuted(true);
-//     }
+//   const sendAudioChunk = async (chunk: Blob) => {
+//     const formData = new FormData();
+//     formData.append("audio", chunk, "chunk.webm");
+
+//     const res = await fetch("/api/audio-stream", {
+//       method: "POST",
+//       body: formData,
+//     });
+
+//     const data = await res.json();
+//     console.log("Transcription result:", data.text || data.error);
 //   };
+// const handleMicToggle = async () => {
+//   if (isMuted) {
+//     try {
+//       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+//       const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+
+//       audioChunksRef.current = [];
+
+//       mediaRecorder.ondataavailable = (event) => {
+//         if (event.data.size > 0) {
+//           audioChunksRef.current.push(event.data);
+//         }
+//       };
+
+//       mediaRecorder.onstop = async () => {
+//         const fullBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+//         await sendAudioChunk(fullBlob);
+//       };
+
+//       mediaRecorderRef.current = mediaRecorder;
+//       mediaRecorder.start(); // continuous recording
+
+//       setIsMuted(false);
+//     } catch (error) {
+//       console.error("Mic access error:", error);
+//     }
+//   } else {
+//     mediaRecorderRef.current?.stop();
+//     mediaRecorderRef.current?.stream.getTracks().forEach((track) => track.stop());
+//     mediaRecorderRef.current = null;
+//     setIsMuted(true);
+//   }
+// };
 
 //   return (
 //     <div className="relative">
@@ -56,11 +81,9 @@
 //           </Button>
 //         </TooltipTrigger>
 //         <TooltipContent side="top">
-//           <p>{isMuted ? "Unmute" : "Mute"}</p>
+//           <p>{isMuted ? "Start Listening" : "Stop Listening"}</p>
 //         </TooltipContent>
 //       </Tooltip>
-
-//       {/* Mute Indicator */}
 //     </div>
 //   );
 // };
@@ -84,10 +107,17 @@ const Microphone = () => {
     const formData = new FormData();
     formData.append("audio", chunk, "chunk.webm");
 
-    await fetch("/api/audio-stream", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const response = await fetch("/api/audio-stream", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      console.log("Transcription result:", data.text || data.error);
+    } catch (error) {
+      console.error("Error sending audio chunk:", error);
+    }
   };
 
   const handleMicToggle = async () => {
@@ -100,16 +130,33 @@ const Microphone = () => {
         const mediaRecorder = new MediaRecorder(stream, {
           mimeType: "audio/webm",
         });
+        audioChunksRef.current = [];
 
         mediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) {
-            sendAudioChunk(event.data);
+          if (event.data && event.data.size > 1000) {
+            // skip silence or tiny chunks
+            audioChunksRef.current.push(event.data);
+          } else {
+            console.log("Silent chunk skipped");
           }
         };
 
-        mediaRecorder.start(3000); // send every 1s
+        mediaRecorder.onstop = async () => {
+          const fullBlob = new Blob(audioChunksRef.current, {
+            type: "audio/webm",
+          });
+
+          if (fullBlob.size > 1000) {
+            await sendAudioChunk(fullBlob);
+          } else {
+            console.log("No meaningful audio to send");
+          }
+
+          audioChunksRef.current = [];
+        };
 
         mediaRecorderRef.current = mediaRecorder;
+        mediaRecorder.start(); // record continuously
         setIsMuted(false);
       } catch (error) {
         console.error("Mic access error:", error);
