@@ -59,15 +59,17 @@ def transcribe_audio():
         audio.save(tmpfile.name)
 
     try:
-        result = model.transcribe(tmpfile.name, fp16=False)
+        # result = model.transcribe(tmpfile.name, fp16=False)
+        result = model.transcribe(tmpfile.name, fp16=False, language="en", task="transcribe")
+
 
         # result = model.transcribe(tmpfile.name)
         text = result["text"]
         print("Transcript:", text)
-        return jsonify({"text": text})
+        return jsonify({"success":True,"text": text})
     except Exception as e:
         print(e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"success":False,"error": str(e)}), 500
     finally:
         os.unlink(tmpfile.name)
 
