@@ -90,6 +90,10 @@ export const generate_questions = async (req: Request, res: Response) => {
   }
 };
 
+// ------------------------
+// Compiling the code using Judgo
+// ------------------------
+
 export const code_compile = async (req: Request, res: Response) => {
   const { language, code, stdin } = req.body;
   if (!language || !code) {
