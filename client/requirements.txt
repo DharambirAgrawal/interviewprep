@@ -1,7 +1,7 @@
 Flask==2.2.5
 werkzeug==2.3.8
 PyMuPDF
-python-docx
-python-dotenv
+# python-docx
+# python-dotenv
 # git+https://github.com/openai/whisper.git
-openai-whisper
+# openai-whisper
