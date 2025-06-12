@@ -73,6 +73,9 @@ def transcribe_audio():
     finally:
         os.unlink(tmpfile.name)
 
+@app.route("/api/video-stream", methods=["POST"])
+def understand_video():
+    return "Not implemented yet"
 
 if __name__ == "__main__":
     app.run(port=5328, debug=True)
