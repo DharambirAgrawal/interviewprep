@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import ControlPanel from "./ControlPanel";
-
+import Video from "../features/Video";
 const VideoCallInterface = () => {
   const [viewMode, setViewMode] = useState("split"); // split, userFocus, interviewerFocus
 
