@@ -113,6 +113,7 @@ export default function OnboardingPage() {
       const data = await handleOnboardingAction(values);
 
       // Simulating API call
+      // sending data to API
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       //   toast({
