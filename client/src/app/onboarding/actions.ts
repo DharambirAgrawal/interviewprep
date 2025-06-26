@@ -28,7 +28,7 @@ export async function handleResumeUpload(file: File) {
   }
 }
 
-// connecting to python backend
+// connecting to python backend for onboarding
 export async function handleOnboardingAction(data: any) {
   try {
     // Append file (resume)
