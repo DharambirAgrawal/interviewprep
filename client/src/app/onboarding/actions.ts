@@ -31,7 +31,7 @@ export async function handleResumeUpload(file: File) {
 // connecting to python backend
 export async function handleOnboardingAction(data: any) {
   try {
-    // Append file (resume)
+    // Append file (resume) here
 
     console.log(data);
     if (data.resume && data.resume.length > 0) {
