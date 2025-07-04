@@ -1,4 +1,6 @@
 "use client";
+// // VideoCallInterface.tsx
+// This component provides the main video call interface for the interview process.
 import React, { useState } from "react";
 import { MicOff, Settings, Users, Clock, Layout } from "lucide-react";
 import { Button } from "@/components/ui/button";
