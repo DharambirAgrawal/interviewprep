@@ -1,6 +1,5 @@
 "use client";
 // Onbaoarding page for interview preparation
-// here there
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
