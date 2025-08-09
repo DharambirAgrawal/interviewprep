@@ -93,7 +93,7 @@ jobs:
 
       - name: Test if server is accessible
         run: |
-          curl --fail https://pathgurus-befe401e83e1.herokuapp.com/api/test/server || exit 1  # Check if server is up and running
+          curl --fail https://interview-6095c483c7be.herokuapp.com || exit 1  # Check if server is up and running
 
       - name: Stop server container
         run: |
