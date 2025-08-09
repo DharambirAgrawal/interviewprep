@@ -82,7 +82,7 @@ jobs:
           # Log in to Heroku Container Registry
           heroku container:login
           # Set the stack to container
-          docker tag pathgurus-server:1.0 registry.heroku.com/$HEROKU_APP_NAME/web  # Tag the image for Heroku
+          docker tag interview-server:1.0 registry.heroku.com/$HEROKU_APP_NAME/web  # Tag the image for Heroku
           heroku stack:set container --app $HEROKU_APP_NAME
 
           # Push the Docker image to Heroku

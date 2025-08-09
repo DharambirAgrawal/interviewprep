@@ -10,7 +10,7 @@ import { onboardRouter } from "./api/onboard/onboard.routes";
 const routes = (app: Application): void => {
   // Example route using the upload middleware
 
-  app.get("/", upload.any(), (req: Request, res: Response) => {
+  app.get("/", (req: Request, res: Response) => {
     res.send("Hello World here");
   });
 
