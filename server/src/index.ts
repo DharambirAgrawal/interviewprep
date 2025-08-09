@@ -7,7 +7,7 @@ import { Server } from "http";
 dotenv.config();
 
 // Get the PORT value from the environment variables or default to 3000
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 // Start the server and log the running status
 const server: Server = app.listen(PORT, () => {
