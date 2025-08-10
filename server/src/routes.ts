@@ -13,6 +13,9 @@ const routes = (app: Application): void => {
   app.get("/", (req: Request, res: Response) => {
     res.send("Hello World");
   });
+  app.get("/health", (req: Request, res: Response) => {
+    res.status(200).send("OK");
+  });
 
   app.use("/api/auth", authRouter);
   app.use("/api/service", serviceRouter);

@@ -97,7 +97,7 @@ jobs:
 
       - name: Test if server is accessible
         run: |
-          curl --fail https://interview-ac4fa80a84e4.herokuapp.com || exit 1  # Check if server is up and running
+          curl --fail https://interview-ac4fa80a84e4.herokuapp.com/health || exit 1  # Check if server is up and running
 
       - name: Stop server container
         run: |
