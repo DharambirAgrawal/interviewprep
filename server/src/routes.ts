@@ -13,8 +13,12 @@ const routes = (app: Application): void => {
   app.get("/", (req: Request, res: Response) => {
     res.send("Hello World");
   });
-  app.get("/health", (req: Request, res: Response) => {
-    res.status(200).send("OK");
+  app.get("/health", async (req: Request, res: Response) => {
+    // res.status(200).send("OK");
+    res.status(200).json({
+      message: "Server is up and running",
+      success: true,
+    });
   });
 
   app.use("/api/auth", authRouter);
