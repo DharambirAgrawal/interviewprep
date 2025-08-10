@@ -11,7 +11,7 @@ const routes = (app: Application): void => {
   // Example route using the upload middleware
 
   app.get("/", (req: Request, res: Response) => {
-    res.send("Hello World");
+    res.send("Hello World here");
   });
 
   app.use("/api/auth", authRouter);

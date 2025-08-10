@@ -92,7 +92,7 @@ jobs:
           heroku container:release web --app $HEROKU_APP_NAME
           
           # logs
-          heroku logs --tail --app $HEROKU_APP_NAME
+          # heroku logs --tail --app $HEROKU_APP_NAME
 
 
       - name: Test if server is accessible
