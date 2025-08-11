@@ -29,7 +29,6 @@ const routes = (app: Application): void => {
 
   // Catch-all for undefined routes with AppError
   app.all(/.*/, (req: Request, res: Response, next: NextFunction) => {
-    console.log("kkkkkkkkkkkkkkkkkk");
     throw new AppError(`Can't find ${req.originalUrl} on this server!`, 404);
   });
 
