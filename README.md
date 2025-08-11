@@ -56,13 +56,20 @@ Create `server/.env` file:
 PORT=5000
 NODE_ENV=development
 
-# Database
-DATABASE_URL=your_database_connection_string
-DB_HOST=localhost
+# Database Connection
+# For local Dockerized Postgres, use:
+DB_HOST=db
 DB_PORT=5432
 DB_NAME=interview_db
-DB_USER=your_db_user
-DB_PASSWORD=your_db_password
+DB_USER=postgres
+DB_PASSWORD=postgres
+
+# For external DB, override these variables accordingly:
+# DB_HOST=your.external.db.host
+# DB_PORT=5432
+# DB_NAME=yourdbname
+# DB_USER=youruser
+# DB_PASSWORD=yourpassword
 
 # JWT & Authentication
 JWT_SECRET=your_super_secure_jwt_secret
@@ -107,6 +114,25 @@ docker-compose up -d
 # View logs
 docker-compose logs -f
 ```
+#### Using Docker with External Database
+If you want to connect the backend server to an external Postgres instance instead of running the Postgres container:
+
+- Do not start the db service.
+- Set database environment variables to your external DB:
+
+Example command to run only the server with external DB connection:
+
+```bash
+DB_HOST=your.external.db.host \
+DB_PORT=5432 \
+DB_USER=youruser \
+DB_PASSWORD=yourpassword \
+DB_NAME=yourdbname \
+docker-compose up -d server
+
+```
+> ⚠️ When using an external database, make sure **NOT** to start the `db` service to avoid conflicts.
+
 
 #### Manual Setup
 

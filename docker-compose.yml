@@ -8,20 +8,29 @@ services:
       - "8080:8080"
     networks:
       - app-network
+    environment:
+      DB_HOST: ${DB_HOST:-db}          # defaults to 'db' container if not set externally
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-interview_db}
 
-  # client:
-  #   build:
-  #     context: ./client
-  #     dockerfile: Dockerfile.nextjs
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - server # Ensure server starts first, but doesn't guarantee it's ready
-  #   environment:
-  #     NEXT_PUBLIC_API_URL: http://server:8080 # Ensure client communicates with the 'server' service
-  #   networks:
-  #     - app-network
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: interview_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
 
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  postgres_data:
