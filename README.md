@@ -26,7 +26,7 @@ interview/
 
 ```bash
 git clone <repository-url>
-cd interview
+cd interviewprep
 ```
 
 ### 2. Environment Setup
