@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { APP_NAME, navigation } from "@/lib/data";
+import { SimpleAuthButtons } from "@/components/auth/SimpleAuthButtons";
 
 export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -39,13 +40,8 @@ export function Navbar() {
               </Link>
             ))}
 
-            {/* Main CTA Button */}
-            <Link
-              href="/onboarding"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 shadow-md hover:shadow-lg"
-            >
-              Get Started
-            </Link>
+            {/* Auth Buttons */}
+            <SimpleAuthButtons />
           </div>
 
           {/* Mobile toggle */}
@@ -106,14 +102,8 @@ export function Navbar() {
               </Link>
             ))}
 
-            {/* Mobile CTA Button */}
-            <Link
-              href="/onboarding"
-              onClick={() => setMenuOpen(false)}
-              className="block bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg font-medium transition-colors duration-200 text-center mt-4"
-            >
-              Get Started
-            </Link>
+            {/* Mobile Auth Buttons */}
+            <SimpleAuthButtons mobile onLinkClick={() => setMenuOpen(false)} />
           </div>
         </div>
       )}
