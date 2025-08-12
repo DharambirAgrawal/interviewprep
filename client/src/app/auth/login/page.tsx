@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,14 +25,8 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
-
-const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  rememberMe: z.boolean().default(false),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
+import { loginSchema, type LoginFormValues } from "@/lib/schemas/auth";
+import { ROUTES } from "@/lib/constants";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -56,8 +49,8 @@ export default function LoginPage() {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Redirect to dashboard or home page after successful login
-      // router.push('/dashboard')
+      // Redirect to dashboard after successful login
+      window.location.href = ROUTES.DASHBOARD;
     } catch (error) {
       console.error("Login error:", error);
     } finally {

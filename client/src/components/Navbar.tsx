@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { APP_NAME, navigation } from "@/lib/data";
+import { APP_NAME, MAIN_NAVIGATION } from "@/lib/constants";
 import { SimpleAuthButtons } from "@/components/auth/SimpleAuthButtons";
 
 export function Navbar() {
@@ -30,10 +30,10 @@ export function Navbar() {
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center space-x-8">
-            {navigation.map((item, index) => (
+            {MAIN_NAVIGATION.map((item, index) => (
               <Link
                 key={index}
-                href={item.link}
+                href={item.href}
                 className="text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium"
               >
                 {item.name}
@@ -91,10 +91,10 @@ export function Navbar() {
       {menuOpen && (
         <div className="md:hidden bg-white dark:bg-gray-800 shadow-md">
           <div className="px-4 pt-2 pb-4 space-y-2">
-            {navigation.map((item, index) => (
+            {MAIN_NAVIGATION.map((item, index) => (
               <Link
                 key={index}
-                href={item.link}
+                href={item.href}
                 onClick={() => setMenuOpen(false)}
                 className="block text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium py-2"
               >
