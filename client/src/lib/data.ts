@@ -33,6 +33,18 @@ export const navigation = [
 
 export const LANGUAGES = [
   {
+    id: 63,
+    name: "JavaScript (Node.js 18.15.0)",
+  },
+  {
+    id: 71,
+    name: "Python (3.8.1)",
+  },
+  {
+    id: 62,
+    name: "Java (OpenJDK 13.0.1)",
+  },
+  {
     id: 11,
     name: "Bosque (latest)",
   },
@@ -151,6 +163,9 @@ export const LANGUAGES = [
 ];
 
 export const LANGUAGE_CONFIG = {
+  63: { monaco: "javascript", extension: "js" }, // JavaScript (Node.js 18.15.0)
+  71: { monaco: "python", extension: "py" }, // Python (3.8.1)
+  62: { monaco: "java", extension: "java" }, // Java (OpenJDK 13.0.1)
   1: { monaco: "c", extension: "c" }, // C (Clang 10.0.1)
   2: { monaco: "cpp", extension: "cpp" }, // C++ (Clang 10.0.1)
   3: { monaco: "c", extension: "c3" }, // C3 (latest)
