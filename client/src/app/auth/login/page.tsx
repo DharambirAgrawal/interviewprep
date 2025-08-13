@@ -59,10 +59,22 @@ export default function LoginPage() {
       // TODO: Implement actual login logic here
       console.log("Login values:", values);
       // Simulate API call
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/login`,
+        {
+          method: "POST",
+          body: JSON.stringify(values),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await res.json();
+      console.log(data);
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Redirect to dashboard after successful login
-      window.location.href = ROUTES.DASHBOARD;
+      // window.location.href = ROUTES.DASHBOARD;
     } catch (error) {
       console.error("Login error:", error);
     } finally {
