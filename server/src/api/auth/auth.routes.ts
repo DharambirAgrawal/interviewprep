@@ -8,4 +8,7 @@ export const authRouter = AuthRouter.post("/login", catchAsync(login)).post(
   "/signup",
   catchAsync(signup)
 );
+
+
+
 // .post("/reset-password",catchAsync(resetPassword))
