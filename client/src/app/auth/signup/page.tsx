@@ -53,6 +53,19 @@ export default function SignupPage() {
       // TODO: Implement actual signup logic here
       console.log("Signup values:", values);
       // Simulate API call
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/signup`,
+        {
+          method: "POST",
+          body: JSON.stringify(values),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await res.json();
+      console.log(data);
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Redirect to verification page or login page after successful signup

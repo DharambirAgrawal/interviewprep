@@ -1,6 +1,6 @@
 "use client";
-import type { Metadata } from "next";
-import { buildPageMetadata } from "@/lib/seo";
+// import type { Metadata } from "next";
+// import { buildPageMetadata } from "@/lib/seo";
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -279,9 +279,9 @@ export default function DashboardPage() {
   );
 }
 
-export const metadata: Metadata = buildPageMetadata({
-  title: "Overview",
-  description: "Overview of your interview preparation progress and actions.",
-  alternates: { canonical: "/dashboard" },
-  robots: { index: false, follow: true },
-});
+// export const metadata: Metadata = buildPageMetadata({
+//   title: "Overview",
+//   description: "Overview of your interview preparation progress and actions.",
+//   alternates: { canonical: "/dashboard" },
+//   robots: { index: false, follow: true },
+// });

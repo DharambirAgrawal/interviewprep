@@ -200,9 +200,6 @@ const Microphone = () => {
           <p>{isMuted ? "Start Listening" : "Stop Listening"}</p>
         </TooltipContent>
       </Tooltip>
-      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl font-bold bg-black/20 p-4 rounded-md text-white shadow-lg max-w-3xl text-center">
-        {text}
-      </div>
     </div>
   );
 };
