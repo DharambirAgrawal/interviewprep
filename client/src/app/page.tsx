@@ -1,4 +1,6 @@
 import DefaultLayout from "./DefaultLayout";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/landing/Hero";
 import { SectionTitle } from "@/components/SectionTitle";
 import { Benefits } from "@/components/landing/Benefits";
@@ -98,3 +100,10 @@ export default function Home() {
     </DefaultLayout>
   );
 }
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "AI Interview Preparation Platform",
+  description:
+    "Practice mock interviews with AI, get instant feedback, and track your progress to land your next job.",
+  alternates: { canonical: "/" },
+});

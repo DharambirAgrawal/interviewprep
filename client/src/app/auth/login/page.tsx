@@ -1,4 +1,6 @@
 "use client";
+// import type { Metadata } from "next";
+// import { buildPageMetadata } from "@/lib/seo";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -248,3 +250,10 @@ export default function LoginPage() {
     </div>
   );
 }
+
+// export const metadata: Metadata = buildPageMetadata({
+//   title: "Sign In",
+//   description: "Access your account to continue your AI interview preparation.",
+//   alternates: { canonical: "/auth/login" },
+//   robots: { index: false, follow: true },
+// });

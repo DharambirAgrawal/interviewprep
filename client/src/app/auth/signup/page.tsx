@@ -1,4 +1,6 @@
 "use client";
+// import type { Metadata } from "next";
+// import { buildPageMetadata } from "@/lib/seo";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -334,3 +336,10 @@ export default function SignupPage() {
     </div>
   );
 }
+
+// export const metadata: Metadata = buildPageMetadata({
+//   title: "Create Account",
+//   description: "Join to start AI-powered interview practice and analytics.",
+//   alternates: { canonical: "/auth/signup" },
+//   robots: { index: true, follow: true },
+// });

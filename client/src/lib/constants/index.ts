@@ -1,6 +1,8 @@
 // Application Constants
 
-export const APP_NAME = "PrepAI";
+// Single source of truth for the app/brand name so it's easy to change
+export const SITE_NAME = "PrepAI";
+export const APP_NAME = SITE_NAME; // backwards-compatible alias
 export const APP_DESCRIPTION =
   "PrepAI is your ultimate companion for AI and Machine Learning interview preparation. Practice coding, theory, system design, and real-world case studies crafted by industry experts.";
 

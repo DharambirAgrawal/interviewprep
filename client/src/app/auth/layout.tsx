@@ -1,5 +1,7 @@
 import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo";
 
 export default function AuthLayout({
   children,
@@ -14,3 +16,9 @@ export default function AuthLayout({
     </div>
   );
 }
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "Account",
+  alternates: { canonical: "/auth" },
+  robots: { index: false, follow: true },
+});

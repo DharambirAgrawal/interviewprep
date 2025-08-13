@@ -1,4 +1,6 @@
 "use client";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo";
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -551,3 +553,10 @@ export default function OnboardingPage() {
     </div>
   );
 }
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "Onboarding",
+  description: "Tell us about your background to personalize your preparation.",
+  alternates: { canonical: "/dashboard/onboarding" },
+  robots: { index: false, follow: true },
+});

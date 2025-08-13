@@ -1,4 +1,6 @@
 "use client";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -177,3 +179,11 @@ export default function ForgotPasswordPage() {
     </div>
   );
 }
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "Forgot Password",
+  description:
+    "Reset your password securely and regain access to your account.",
+  alternates: { canonical: "/auth/forgot-password" },
+  robots: { index: false, follow: true },
+});
