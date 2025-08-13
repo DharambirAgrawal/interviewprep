@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,7 +27,16 @@ import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { loginSchema, type LoginFormValues } from "@/lib/schemas/auth";
-import { ROUTES } from "@/lib/constants";
+
+// Define the schema inline to avoid import issues
+
+// // Infer the type from the schema
+// export type LoginFormValues = z.infer<typeof loginSchema>;
+
+// Define ROUTES constant to avoid import issues
+const ROUTES = {
+  DASHBOARD: "/dashboard",
+} as const;
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);

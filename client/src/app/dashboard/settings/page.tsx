@@ -81,7 +81,7 @@ export default function SettingsPage() {
     },
   });
 
-  const preferencesForm = useForm({
+  const preferencesForm = useForm<z.infer<typeof preferencesSchema>>({
     resolver: zodResolver(preferencesSchema),
     defaultValues: {
       theme: "system",
