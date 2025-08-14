@@ -71,6 +71,7 @@ export const signup = async (req: Request, res: Response) => {
     res.status(500).json({ status: "error", message: "Internal server error" });
   }
 };
+};
 
 //    login
 export const login = [
