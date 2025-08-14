@@ -1,6 +1,6 @@
 // server.ts
+import app from "./app"; 
 import dotenv from "dotenv";
-import app from "./app"; // Assuming you have app.ts or app.js
 import { Server } from "http";
 
 // Load environment variables from .env file
