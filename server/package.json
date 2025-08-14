@@ -1,11 +1,20 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "_moduleAliases": {
+    "@utils": "dist/utils",
+    "@errors": "dist/errors",
+    "@api": "dist/api",
+    "@database": "dist/database",
+    "@types": "dist/types",
+    "@middlewares": "dist/middlewares",
+    "@config": "dist/config"
+  },
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node -r module-alias/register dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -17,8 +26,10 @@
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.0.1",
     "form-data": "^4.0.2",
     "jsonwebtoken": "^9.0.2",
+    "module-alias": "^2.2.3",
     "mongoose": "^8.15.1",
     "multer": "^2.0.0",
     "uuid": "^11.1.0"
