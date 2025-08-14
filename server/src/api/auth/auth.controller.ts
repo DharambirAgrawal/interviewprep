@@ -10,8 +10,6 @@ import {
 } from "@utils/utils";
 import { AppError } from "@errors/AppError";
 
-const router = express.Router();
-
 interface User {
   firstName: string;
   lastName: string;
@@ -21,9 +19,6 @@ interface User {
 
 // In-memory store
 const users = new Map<string, User>();
-// const JWT_SECRET = process.env.JWT_SECRET;
-
-// const TOKEN_EXPIRY: string = process.env.TOKEN_EXPIRY || "1d";
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -121,3 +116,7 @@ export const login = [
     }
   },
 ];
+
+// logout
+
+// forgot password
