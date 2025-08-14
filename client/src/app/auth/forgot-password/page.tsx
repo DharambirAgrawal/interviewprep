@@ -1,5 +1,5 @@
 "use client";
-import type { Metadata } from "next";
+// import type { Metadata } from "next";
 import { buildPageMetadata } from "@/lib/seo";
 
 import { useState } from "react";
@@ -49,6 +49,18 @@ export default function ForgotPasswordPage() {
     try {
       // TODO: Implement actual forgot password logic here
       console.log("Forgot password values:", values);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/forgot-password`,
+        {
+          method: "POST",
+          body: JSON.stringify(values),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await res.json();
+      console.log(data);
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
@@ -180,10 +192,10 @@ export default function ForgotPasswordPage() {
   );
 }
 
-export const metadata: Metadata = buildPageMetadata({
-  title: "Forgot Password",
-  description:
-    "Reset your password securely and regain access to your account.",
-  alternates: { canonical: "/auth/forgot-password" },
-  robots: { index: false, follow: true },
-});
+// export const metadata: Metadata = buildPageMetadata({
+//   title: "Forgot Password",
+//   description:
+//     "Reset your password securely and regain access to your account.",
+//   alternates: { canonical: "/auth/forgot-password" },
+//   robots: { index: false, follow: true },
+// });

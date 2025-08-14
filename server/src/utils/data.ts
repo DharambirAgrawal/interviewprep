@@ -1,4 +1,6 @@
 export const APP_NAME = "pathgurus";
+export const APP_YEAR = new Date().getFullYear();
+export const EMAIL = "bhishmaprasai55@gmail.com";
 
 export const LANGUAGES = [
   {
