@@ -32,6 +32,7 @@
     "module-alias": "^2.2.3",
     "mongoose": "^8.15.1",
     "multer": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
