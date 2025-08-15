@@ -1,6 +1,9 @@
 import express, { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt, { SignOptions } from "jsonwebtoken";
+import { db } from "../../database/index";
+import { users } from "../../database/schema";
+import { eq } from "drizzle-orm";
 
 import {
   validateAndNormalizeEmail,
@@ -12,22 +15,7 @@ import { AppError } from "@errors/AppError";
 import { sendEmail } from "services/emailService";
 import { FORGET_PASSWORD_MESSAGE } from "@utils/EmailMessages";
 
-interface User {
-  firstName: string;
-  lastName: string;
-  email: string;
-  passwordHash: string;
-}
-// await sendEmail({
-//     TO: email,
-//     message: FORGET_PASSWORD_MESSAGE({
-//       link: link,
-//       name: updatedUser.firstName,
-//     }),
-//   });
 
-// In-memory store
-const users = new Map<string, User>();
 
 //    Signup
 export const signup = async (req: Request, res: Response) => {
@@ -45,13 +33,27 @@ export const signup = async (req: Request, res: Response) => {
       throw new AppError("Passwords do not match", 400);
     }
 
-    if (users.has(email)) {
-      throw new AppError("Registration failed", 400);
+    const existingUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email));
+
+    if (existingUser.length > 0) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Email already registered" });
     }
 
     const passwordHash = await hashData(password);
-    const newUser: User = { firstName, lastName, email, passwordHash };
-    users.set(email, newUser);
+    await db
+      .insert(users)
+      .values({
+        firstName,
+        lastName,
+        email,
+        password: passwordHash,
+      })
+      .returning();
 
     const payload = { email };
     const options: SignOptions = {
@@ -87,21 +89,31 @@ export const login = async (req: Request, res: Response) => {
       });
     }
 
-    const user = users.get(email);
-    const authError = {
-      status: "error",
-      message: "Invalid email or password",
-    };
+    const user = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+    if (!user || user.length === 0) {
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid email or password",
+      });
+    }
 
-    if (!user) return res.status(401).json(authError);
-
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
-    if (!isMatch) return res.status(401).json(authError);
+    const dbUser = user[0];
+    const isMatch = await bcrypt.compare(password, dbUser.password);
+    if (!isMatch) {
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid email or password",
+      });
+    }
 
     const payload = {
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
+      email: dbUser.email,
+      firstName: dbUser.firstName,
+      lastName: dbUser.lastName,
     };
     const options: SignOptions = {
       expiresIn: process.env.TOKEN_EXPIRY as jwt.SignOptions["expiresIn"],

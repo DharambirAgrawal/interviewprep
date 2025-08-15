@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { AppError } from "../../errors/AppError";
-import { Users } from "../../database/user"; // Your in-memory storage
+import { Users } from "../../database/schema"; // Your in-memory storage
 // import { extractTextFromResume } from "../../utils/resumeParser"; // hypothetical utility
 import { v4 as uuidv4 } from "uuid";
 
