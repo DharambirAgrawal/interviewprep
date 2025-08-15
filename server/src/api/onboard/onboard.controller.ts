@@ -4,6 +4,20 @@ import { users } from "../../database/schema"; // Your in-memory storage
 // import { extractTextFromResume } from "../../utils/resumeParser"; // hypothetical utility
 import { v4 as uuidv4 } from "uuid";
 
+import { sendEmail } from "../../services/emailService";
+import {
+  VERIFY_EMAIL_MESSAGE,
+  FORGET_PASSWORD_MESSAGE,
+} from "../../utils/EmailMessages";
+
+// await sendEmail({
+//   TO: email,
+//   message: FORGET_PASSWORD_MESSAGE({
+//     link: link,
+//     name: updatedUser.firstName,
+//   }),
+// });
+
 // export const user_onboarding = async (req: Request, res: Response) => {
 //   const {
 //     firstName,
@@ -145,6 +159,4 @@ export const user_onboarding = async (req: Request, res: Response) => {
 };
 export const get_onboarded_user = async (req: Request, res: Response) => {
   const userId = req.params.id;
-
-
 };

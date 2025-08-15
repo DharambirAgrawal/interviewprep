@@ -2,6 +2,7 @@ import express from "express";
 import { catchAsync } from "../../errors/catchAsync";
 import { login, signup } from "./auth.controller";
 import rateLimit from "express-rate-limit";
+import { authenticateToken } from "./auth.middleware";
 const AuthRouter = express.Router();
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
