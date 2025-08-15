@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { AppError } from "../../errors/AppError";
-import { Users } from "../../database/schema"; // Your in-memory storage
+import { users } from "../../database/schema"; // Your in-memory storage
 // import { extractTextFromResume } from "../../utils/resumeParser"; // hypothetical utility
 import { v4 as uuidv4 } from "uuid";
 
@@ -128,10 +128,7 @@ export const user_onboarding = async (req: Request, res: Response) => {
     createdAt: new Date(),
   };
 
-  // Store in memory
-  Users.push(userData);
-
-  console.log(Users);
+  console.log(users);
 
   // Send back response
   res.status(201).json({
@@ -149,15 +146,5 @@ export const user_onboarding = async (req: Request, res: Response) => {
 export const get_onboarded_user = async (req: Request, res: Response) => {
   const userId = req.params.id;
 
-  // Find user in memory store
-  const user = Users.find((u) => u.id === userId);
 
-  if (!user) {
-    throw new AppError("User not found!", 404);
-  }
-
-  res.status(200).json({
-    success: true,
-    data: user,
-  });
 };
