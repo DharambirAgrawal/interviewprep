@@ -5,6 +5,7 @@ import { errorHandler } from "./middlewares/ErrorHandler";
 import { serviceRouter } from "./api/service/service.routes";
 import { authRouter } from "./api/auth/auth.routes";
 import { onboardRouter } from "./api/onboard/onboard.routes";
+import profileRouter from "./api/profile/profile.routes";
 
 // Define routes function with proper typing for Express app
 const routes = (app: Application): void => {
@@ -24,6 +25,7 @@ const routes = (app: Application): void => {
   app.use("/api/auth", authRouter);
   app.use("/api/service", serviceRouter);
   app.use("/api/onboard", upload.any(), onboardRouter);
+  app.use("/api/profile", profileRouter);
 
   //   app.use("/api/media", upload.any(), mediaRouter);
 

@@ -42,6 +42,13 @@ import {
   INTERVIEW_TYPES,
   INTERVIEW_STYLES,
 } from "@/lib/constants/index";
+import {
+  getUserProfile,
+  updateProfile,
+  updateBasicInfo,
+  uploadFiles,
+  type ProfileData,
+} from "@/lib/services/profileService";
 
 const profileSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -127,52 +134,44 @@ export default function SettingsPage() {
     const fetchUserProfile = async () => {
       try {
         setIsLoading(true);
-        // TODO: Replace with actual API call
-        // const response = await fetch('/api/profile');
-        // const data = await response.json();
 
-        // Mock API response
-        const data = {
-          firstName: "John",
-          lastName: "Doe",
-          email: "john.doe@example.com",
-          jobTitle: "Software Engineer",
-          company: "TechCorp",
-          bio: "Experienced software engineer with a passion for building web applications.",
-          resume: "",
-          profileImageUrl: "https://github.com/shadcn.png", // Example profile image URL
-          targetIndustry: "technology",
-          interviewDifficulty: "intermediate",
-          interviewType: "technical",
-          interviewStyle: "problem_solving",
-          primarySkills: "JavaScript, React, Node.js, TypeScript",
-          weakAreas: "System Design, GraphQL",
-          interviewComfortLevel: "7",
-        };
+        // Fetch profile data from API
+        const data: ProfileData = await getUserProfile();
 
         // Set profile image if available
-        if (data.profileImageUrl) {
-          setProfileImageUrl(data.profileImageUrl);
+        if (data.profile?.profileImageUrl) {
+          setProfileImageUrl(data.profile.profileImageUrl);
+        }
+
+        // Set resume URL if available
+        if (data.profile?.resumeUrl) {
+          setResumeUrl(data.profile.resumeUrl);
         }
 
         // Update form with fetched data
         profileForm.reset({
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email: data.email,
-          jobTitle: data.jobTitle,
-          company: data.company,
-          bio: data.bio,
-          targetIndustry: data.targetIndustry,
-          interviewDifficulty: data.interviewDifficulty,
-          interviewType: data.interviewType,
-          interviewStyle: data.interviewStyle,
-          primarySkills: data.primarySkills,
-          weakAreas: data.weakAreas,
-          interviewComfortLevel: data.interviewComfortLevel,
+          firstName: data.firstName || "",
+          lastName: data.lastName || "",
+          email: data.email || "",
+          jobTitle: data.profile?.jobTitle || "",
+          company: data.profile?.company || "",
+          bio: data.profile?.bio || "",
+          targetIndustry: data.profile?.targetIndustry || "",
+          interviewDifficulty: data.profile?.interviewDifficulty || "",
+          interviewType: data.profile?.interviewType || "",
+          interviewStyle: data.profile?.interviewStyle || "",
+          primarySkills: data.profile?.primarySkills || "",
+          weakAreas: data.profile?.weakAreas || "",
+          interviewComfortLevel:
+            data.profile?.interviewComfortLevel?.toString() || "",
         });
       } catch (error) {
         console.error("Failed to fetch profile:", error);
+        // Handle case where user is not authenticated or profile doesn't exist
+        if (error instanceof Error && error.message.includes("401")) {
+          // Redirect to login if not authenticated
+          window.location.href = "/auth/login";
+        }
       } finally {
         setIsLoading(false);
       }
@@ -206,39 +205,70 @@ export default function SettingsPage() {
     try {
       console.log("Profile values:", values);
 
-      // Create a FormData object if there's a profile image to upload
-      const formData = new FormData();
+      // First, handle file uploads if any
+      let uploadedFileUrls: any = {};
 
-      // Add all profile data to FormData
-      Object.keys(values).forEach((key) => {
-        if (key !== "profileImage") {
-          formData.append(key, values[key]);
-        }
-      });
+      if (profileImageFile || resumeFile) {
+        const filesToUpload: any = {};
+        if (profileImageFile) filesToUpload.profileImage = profileImageFile;
+        if (resumeFile) filesToUpload.resume = resumeFile;
 
-      // Add profile image if available
-      if (profileImageFile) {
-        formData.append("profileImage", profileImageFile);
+        const uploadResult = await uploadFiles(filesToUpload);
+        uploadedFileUrls = uploadResult.data;
       }
 
-      // TODO: Send data to server
-      // const response = await fetch('/api/profile', {
-      //   method: 'PUT',
-      //   body: formData
-      // });
+      // Prepare profile data for update
+      const profileData = {
+        jobTitle: values.jobTitle,
+        company: values.company,
+        bio: values.bio,
+        targetIndustry: values.targetIndustry,
+        interviewDifficulty: values.interviewDifficulty,
+        interviewType: values.interviewType,
+        interviewStyle: values.interviewStyle,
+        primarySkills: values.primarySkills,
+        weakAreas: values.weakAreas,
+        interviewComfortLevel: values.interviewComfortLevel
+          ? parseInt(values.interviewComfortLevel)
+          : undefined,
+        ...(uploadedFileUrls.profileImageUrl && {
+          profileImageUrl: uploadedFileUrls.profileImageUrl,
+        }),
+        ...(uploadedFileUrls.resumeUrl && {
+          resumeUrl: uploadedFileUrls.resumeUrl,
+        }),
+      };
 
-      // if (!response.ok) {
-      //   throw new Error('Failed to update profile');
-      // }
+      // Prepare basic info data for update
+      const basicInfoData = {
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+      };
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Update basic info and profile data
+      await Promise.all([
+        updateBasicInfo(basicInfoData),
+        updateProfile(profileData),
+      ]);
+
+      // Update local state with new file URLs
+      if (uploadedFileUrls.profileImageUrl) {
+        setProfileImageUrl(uploadedFileUrls.profileImageUrl);
+      }
+      if (uploadedFileUrls.resumeUrl) {
+        setResumeUrl(uploadedFileUrls.resumeUrl);
+      }
+
+      // Clear file states
+      setProfileImageFile(null);
+      setResumeFile(null);
 
       // Show success message
       alert("Profile updated successfully");
     } catch (error) {
       console.error("Profile update error:", error);
-      alert("Failed to update profile");
+      alert("Failed to update profile. Please try again.");
     } finally {
       setIsLoading(false);
     }

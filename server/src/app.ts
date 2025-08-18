@@ -2,6 +2,7 @@ import cors from "cors";
 import multer from "multer";
 import dotenv from "dotenv";
 import express from "express";
+import path from "path";
 import { logger } from "./utils/logger";
 import routes from "./routes";
 
@@ -20,6 +21,9 @@ app.use(
   })
 );
 app.use(logger);
+
+// Static file serving for uploads
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // Now handle URL-encoded and JSON body parsing
 app.use(express.json()); // For parsing JSON bodies
