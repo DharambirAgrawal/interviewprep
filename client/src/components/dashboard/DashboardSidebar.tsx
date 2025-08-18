@@ -4,15 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { DASHBOARD_NAVIGATION, APP_NAME } from "@/lib/constants";
-import { Home, UserPlus, Video, Settings, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useState } from "react";
-
-const iconMap = {
-  Overview: Home,
-  Onboarding: UserPlus,
-  Interview: Video,
-  Settings: Settings,
-};
 
 export function DashboardSidebar() {
   const pathname = usePathname();
@@ -71,7 +64,8 @@ function SidebarContent() {
           <li>
             <ul role="list" className="-mx-2 space-y-1">
               {DASHBOARD_NAVIGATION.map((item) => {
-                const Icon = iconMap[item.name as keyof typeof iconMap];
+                // const Icon = iconMap[item.name as keyof typeof iconMap];
+                const Icon = item.icon;
                 const isActive = pathname === item.href;
 
                 return (

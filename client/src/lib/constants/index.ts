@@ -1,4 +1,5 @@
 // Application Constants
+import { Home, Video, Settings, BarChart } from "lucide-react";
 
 // Single source of truth for the app/brand name so it's easy to change
 export const SITE_NAME = "PrepAI";
@@ -22,10 +23,10 @@ export const MAIN_NAVIGATION = [
 
 // Dashboard Navigation
 export const DASHBOARD_NAVIGATION = [
-  { name: "Overview", href: "/dashboard" },
-  { name: "Onboarding", href: "/dashboard/onboarding" },
-  { name: "Interview", href: "/dashboard/interview" },
-  { name: "Settings", href: "/dashboard/settings" },
+  { name: "Overview", href: "/dashboard", icon: Home },
+  { name: "Interview", href: "/dashboard/interview", icon: Video },
+  { name: "Analytics", href: "/dashboard/analytics", icon: BarChart },
+  { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
 // Interview Types
@@ -57,38 +58,6 @@ export const DIFFICULTY_LEVELS = [
   { value: "intermediate", label: "Intermediate" },
   { value: "advanced", label: "Advanced" },
   { value: "expert", label: "Expert" },
-];
-
-// Interview Styles
-export const INTERVIEW_STYLES = [
-  { value: "conversational", label: "Conversational" },
-  { value: "formal", label: "Formal" },
-  { value: "rapid-fire", label: "Rapid Fire" },
-  { value: "whiteboard", label: "Whiteboard" },
-];
-
-// Common Skills
-export const COMMON_SKILLS = [
-  "JavaScript",
-  "TypeScript",
-  "React",
-  "Node.js",
-  "Python",
-  "Java",
-  "C++",
-  "Data Structures",
-  "Algorithms",
-  "System Design",
-  "Database Design",
-  "Machine Learning",
-  "Deep Learning",
-  "Cloud Computing",
-  "DevOps",
-  "Microservices",
-  "API Design",
-  "Security",
-  "Testing",
-  "Agile",
 ];
 
 // Routes
@@ -123,3 +92,31 @@ export const API_ENDPOINTS = {
     HISTORY: "/api/interview/history",
   },
 } as const;
+
+// Constants for profile and onboarding
+
+export const INTERVIEW_STYLES = [
+  { value: "traditional", label: "Traditional" },
+  { value: "conversational", label: "Conversational" },
+  { value: "problem_solving", label: "Problem Solving" },
+  { value: "pair_programming", label: "Pair Programming" },
+  { value: "whiteboard", label: "Whiteboard" },
+];
+
+export const COMMON_SKILLS = [
+  { value: "javascript", label: "JavaScript" },
+  { value: "python", label: "Python" },
+  { value: "java", label: "Java" },
+  { value: "csharp", label: "C#" },
+  { value: "react", label: "React" },
+  { value: "angular", label: "Angular" },
+  { value: "vue", label: "Vue.js" },
+  { value: "node", label: "Node.js" },
+  { value: "sql", label: "SQL" },
+  { value: "nosql", label: "NoSQL" },
+  { value: "aws", label: "AWS" },
+  { value: "docker", label: "Docker" },
+  { value: "kubernetes", label: "Kubernetes" },
+  { value: "systemdesign", label: "System Design" },
+  { value: "algorithms", label: "Algorithms & Data Structures" },
+];

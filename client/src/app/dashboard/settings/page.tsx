@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -19,8 +19,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -31,7 +33,15 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { User, Bell, Shield, Palette } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { User, Bell, Shield, Palette, Upload, X } from "lucide-react";
+
+import {
+  INDUSTRIES,
+  DIFFICULTY_LEVELS,
+  INTERVIEW_TYPES,
+  INTERVIEW_STYLES,
+} from "@/lib/constants/index";
 
 const profileSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -40,6 +50,15 @@ const profileSchema = z.object({
   jobTitle: z.string().optional(),
   company: z.string().optional(),
   bio: z.string().max(500).optional(),
+  resume: z.any().optional(),
+  profileImage: z.any().optional(),
+  targetIndustry: z.string().optional(),
+  interviewDifficulty: z.string().optional(),
+  interviewType: z.string().optional(),
+  interviewStyle: z.string().optional(),
+  primarySkills: z.string().optional(),
+  weakAreas: z.string().optional(),
+  interviewComfortLevel: z.string().optional(),
 });
 
 const notificationSchema = z.object({
@@ -58,18 +77,109 @@ const preferencesSchema = z.object({
 
 export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("profile");
+  const [resumeUrl, setResumeUrl] = useState<string | null>(
+    "http://localhost:3000/dashboard/settings"
+  ); // You can set this from user data
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+
+  // Get tab from URL if available
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get("tab");
+      if (
+        tabParam &&
+        ["profile", "notifications", "preferences", "security"].includes(
+          tabParam
+        )
+      ) {
+        setActiveTab(tabParam);
+      }
+    }
+  }, []);
 
   const profileForm = useForm({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      firstName: "John",
-      lastName: "Doe",
-      email: "john.doe@example.com",
-      jobTitle: "Software Engineer",
-      company: "TechCorp",
+      firstName: "",
+      lastName: "",
+      email: "",
+      jobTitle: "",
+      company: "",
       bio: "",
+      resume: null,
+      profileImage: null,
+      targetIndustry: "",
+      interviewDifficulty: "",
+      interviewType: "",
+      interviewStyle: "",
+      primarySkills: "",
+      weakAreas: "",
+      interviewComfortLevel: "",
     },
   });
+
+  // Fetch user profile from the server
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        setIsLoading(true);
+        // TODO: Replace with actual API call
+        // const response = await fetch('/api/profile');
+        // const data = await response.json();
+
+        // Mock API response
+        const data = {
+          firstName: "John",
+          lastName: "Doe",
+          email: "john.doe@example.com",
+          jobTitle: "Software Engineer",
+          company: "TechCorp",
+          bio: "Experienced software engineer with a passion for building web applications.",
+          resume: "",
+          profileImageUrl: "https://github.com/shadcn.png", // Example profile image URL
+          targetIndustry: "technology",
+          interviewDifficulty: "intermediate",
+          interviewType: "technical",
+          interviewStyle: "problem_solving",
+          primarySkills: "JavaScript, React, Node.js, TypeScript",
+          weakAreas: "System Design, GraphQL",
+          interviewComfortLevel: "7",
+        };
+
+        // Set profile image if available
+        if (data.profileImageUrl) {
+          setProfileImageUrl(data.profileImageUrl);
+        }
+
+        // Update form with fetched data
+        profileForm.reset({
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          jobTitle: data.jobTitle,
+          company: data.company,
+          bio: data.bio,
+          targetIndustry: data.targetIndustry,
+          interviewDifficulty: data.interviewDifficulty,
+          interviewType: data.interviewType,
+          interviewStyle: data.interviewStyle,
+          primarySkills: data.primarySkills,
+          weakAreas: data.weakAreas,
+          interviewComfortLevel: data.interviewComfortLevel,
+        });
+      } catch (error) {
+        console.error("Failed to fetch profile:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [profileForm]);
 
   const notificationForm = useForm({
     resolver: zodResolver(notificationSchema),
@@ -95,10 +205,40 @@ export default function SettingsPage() {
     setIsLoading(true);
     try {
       console.log("Profile values:", values);
-      // TODO: Update profile
+
+      // Create a FormData object if there's a profile image to upload
+      const formData = new FormData();
+
+      // Add all profile data to FormData
+      Object.keys(values).forEach((key) => {
+        if (key !== "profileImage") {
+          formData.append(key, values[key]);
+        }
+      });
+
+      // Add profile image if available
+      if (profileImageFile) {
+        formData.append("profileImage", profileImageFile);
+      }
+
+      // TODO: Send data to server
+      // const response = await fetch('/api/profile', {
+      //   method: 'PUT',
+      //   body: formData
+      // });
+
+      // if (!response.ok) {
+      //   throw new Error('Failed to update profile');
+      // }
+
+      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Show success message
+      alert("Profile updated successfully");
     } catch (error) {
       console.error("Profile update error:", error);
+      alert("Failed to update profile");
     } finally {
       setIsLoading(false);
     }
@@ -141,7 +281,11 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-6"
+      >
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="w-4 h-4" />
@@ -177,8 +321,87 @@ export default function SettingsPage() {
               <Form {...profileForm}>
                 <form
                   onSubmit={profileForm.handleSubmit(onProfileSubmit)}
-                  className="space-y-4"
+                  className="space-y-6"
                 >
+                  {/* Profile Image Upload */}
+                  <div className="flex flex-col items-center space-y-4 sm:flex-row sm:space-x-6 sm:space-y-0 mb-4">
+                    <div className="relative">
+                      <Avatar className="h-24 w-24">
+                        {profileImageUrl ? (
+                          <AvatarImage src={profileImageUrl} alt="Profile" />
+                        ) : (
+                          <AvatarFallback className="text-2xl">
+                            {profileForm.getValues("firstName").charAt(0)}
+                            {profileForm.getValues("lastName").charAt(0)}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                      {profileImageUrl && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-gray-100 dark:bg-gray-800 shadow-sm"
+                          onClick={() => {
+                            setProfileImageUrl(null);
+                            setProfileImageFile(null);
+                          }}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                    <div className="flex flex-col space-y-2">
+                      <FormField
+                        control={profileForm.control}
+                        name="profileImage"
+                        render={({ field: { onChange, value, ...field } }) => (
+                          <FormItem>
+                            <FormLabel>Profile Picture</FormLabel>
+                            <FormControl>
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  id="profileImage"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      const imageUrl =
+                                        URL.createObjectURL(file);
+                                      setProfileImageUrl(imageUrl);
+                                      setProfileImageFile(file);
+                                      onChange(file);
+                                    }
+                                  }}
+                                  {...field}
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  onClick={() =>
+                                    document
+                                      .getElementById("profileImage")
+                                      ?.click()
+                                  }
+                                  className="flex items-center gap-2"
+                                >
+                                  <Upload className="h-4 w-4" />
+                                  Upload Image
+                                </Button>
+                              </div>
+                            </FormControl>
+                            <FormDescription>
+                              Upload a profile picture (JPG, PNG or GIF, max
+                              5MB)
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={profileForm.control}
@@ -256,7 +479,302 @@ export default function SettingsPage() {
                     />
                   </div>
 
-                  <Button type="submit" disabled={isLoading}>
+                  <FormField
+                    control={profileForm.control}
+                    name="bio"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bio</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Tell us about yourself"
+                            className="resize-none min-h-[100px]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Brief description of your professional background (max
+                          500 characters)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {/* Resume Upload */}
+                  <div className="mb-6">
+                    <FormField
+                      control={profileForm.control}
+                      name="resume"
+                      render={({ field: { onChange, value, ...field } }) => (
+                        <FormItem>
+                          <FormLabel>Resume</FormLabel>
+                          <FormControl>
+                            <div className="flex items-center gap-4">
+                              <Input
+                                type="file"
+                                accept=".pdf,.doc,.docx"
+                                className="hidden"
+                                id="resumeUpload"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    setResumeFile(file);
+                                    const url = URL.createObjectURL(file);
+                                    setResumeUrl(url); // Optional: Preview or show download link
+                                    onChange(file);
+                                  }
+                                }}
+                                {...field}
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() =>
+                                  document
+                                    .getElementById("resumeUpload")
+                                    ?.click()
+                                }
+                                className="flex items-center gap-2"
+                              >
+                                <Upload className="h-4 w-4" />
+                                Upload Resume
+                              </Button>
+                              {/* {resumeUrl && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-800 shadow-sm"
+                                  onClick={() => {
+                                    setResumeUrl(null);
+                                    setResumeFile(null);
+                                    onChange(null);
+                                  }}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              )} */}
+                            </div>
+                          </FormControl>
+                          <FormDescription>
+                            Upload a resume in PDF, DOC, or DOCX format (Max
+                            5MB). You can also remove or view the current one.
+                          </FormDescription>
+                          <FormMessage />
+                          {resumeUrl && (
+                            <div className="mt-2">
+                              <a
+                                href={resumeUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-blue-600 underline"
+                              >
+                                View Current Resume
+                              </a>
+                            </div>
+                          )}
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <Separator className="my-6" />
+                  <h3 className="text-lg font-medium mb-4">
+                    Interview Preferences
+                  </h3>
+
+                  <FormField
+                    control={profileForm.control}
+                    name="targetIndustry"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Target Industry</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select your target industry" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {INDUSTRIES.map((industry) => (
+                              <SelectItem
+                                key={industry.value}
+                                value={industry.value}
+                              >
+                                {industry.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={profileForm.control}
+                      name="interviewDifficulty"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Preferred Interview Difficulty</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select difficulty level" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {DIFFICULTY_LEVELS.map((level) => (
+                                <SelectItem
+                                  key={level.value}
+                                  value={level.value}
+                                >
+                                  {level.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={profileForm.control}
+                      name="interviewType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Primary Interview Type</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select interview type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {INTERVIEW_TYPES.map((type) => (
+                                <SelectItem key={type.value} value={type.value}>
+                                  {type.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={profileForm.control}
+                    name="interviewStyle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Preferred Interview Style</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select interview style" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {INTERVIEW_STYLES.map((style) => (
+                              <SelectItem key={style.value} value={style.value}>
+                                {style.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Separator className="my-6" />
+                  <h3 className="text-lg font-medium mb-4">
+                    Skills & Experience
+                  </h3>
+
+                  <FormField
+                    control={profileForm.control}
+                    name="primarySkills"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Primary Skills</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="List your key skills (e.g., JavaScript, React, Node.js, System Design)"
+                            className="min-h-[100px]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          List your main technical and professional skills,
+                          separated by commas
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={profileForm.control}
+                    name="weakAreas"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Areas for Improvement</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Areas you'd like to focus on improving"
+                            className="min-h-[80px]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Help us focus on areas where you want to improve
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={profileForm.control}
+                    name="interviewComfortLevel"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Interview Comfort Level (1-10)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min="1"
+                            max="10"
+                            placeholder="Rate your comfort level from 1 to 10"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          1 = Very nervous, 10 = Very confident
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button type="submit" disabled={isLoading} className="mt-6">
                     {isLoading ? "Saving..." : "Save Changes"}
                   </Button>
                 </form>

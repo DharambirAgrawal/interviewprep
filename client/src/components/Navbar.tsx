@@ -2,7 +2,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { APP_NAME, MAIN_NAVIGATION } from "@/lib/constants";
+
+import { APP_NAME, MAIN_NAVIGATION } from "@/lib/constants/index";
 import { SimpleAuthButtons } from "@/components/auth/SimpleAuthButtons";
 
 export function Navbar() {

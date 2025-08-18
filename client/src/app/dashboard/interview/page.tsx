@@ -23,6 +23,7 @@ import Link from "next/link";
 export default function InterviewPage() {
   const [selectedType, setSelectedType] = useState("");
   const [selectedDifficulty, setSelectedDifficulty] = useState("");
+  const [notes, setNotes] = useState("");
   const [isStarting, setIsStarting] = useState(false);
 
   const interviewTypes = [
@@ -65,6 +66,7 @@ export default function InterviewPage() {
       console.log("Starting interview:", {
         type: selectedType,
         difficulty: selectedDifficulty,
+        notes,
       });
 
       // Simulate starting interview
@@ -111,7 +113,7 @@ export default function InterviewPage() {
             Select your preferences and start practicing immediately
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        {/* <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Interview Type</label>
@@ -155,62 +157,64 @@ export default function InterviewPage() {
           >
             {isStarting ? "Starting Interview..." : "Start Interview Now"}
           </Button>
+        </CardContent> */}
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Interview Type</label>
+              <Select value={selectedType} onValueChange={setSelectedType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose interview type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {interviewTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.id}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Difficulty Level</label>
+              <Select
+                value={selectedDifficulty}
+                onValueChange={setSelectedDifficulty}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose difficulty" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="beginner">Beginner</SelectItem>
+                  <SelectItem value="intermediate">Intermediate</SelectItem>
+                  <SelectItem value="advanced">Advanced</SelectItem>
+                  <SelectItem value="expert">Expert</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Notes Field */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Additional Notes</label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Write any specific goals, topics, or notes before starting..."
+              className="w-full h-24 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <Button
+            onClick={handleStartInterview}
+            disabled={!selectedType || !selectedDifficulty || isStarting}
+            className="w-full md:w-auto bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-700 hover:to-cyan-700"
+          >
+            {isStarting ? "Starting Interview..." : "Start Interview Now"}
+          </Button>
         </CardContent>
       </Card>
-
-      {/* Interview Types Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {interviewTypes.map((type) => {
-          const Icon = type.icon;
-          return (
-            <Card
-              key={type.id}
-              className={`cursor-pointer transition-all hover:shadow-lg ${
-                selectedType === type.id
-                  ? "ring-2 ring-indigo-500 bg-indigo-50 dark:bg-indigo-900/20"
-                  : ""
-              }`}
-              onClick={() => setSelectedType(type.id)}
-            >
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-                    <Icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                  </div>
-                  {type.name}
-                  <Badge variant="secondary" className="ml-auto">
-                    {type.duration}
-                  </Badge>
-                </CardTitle>
-                <CardDescription>{type.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline">AI-Powered</Badge>
-                    <Badge variant="outline">Real-time Feedback</Badge>
-                    <Badge variant="outline">Recorded Session</Badge>
-                  </div>
-
-                  <div className="pt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedType(type.id);
-                      }}
-                      className="w-full"
-                    >
-                      Select This Type
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
 
       {/* Recent Sessions */}
       <Card>

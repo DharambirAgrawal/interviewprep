@@ -1,6 +1,6 @@
 "use client";
-import type { Metadata } from "next";
-import { buildPageMetadata } from "@/lib/seo";
+// import type { Metadata } from "next";
+// import { buildPageMetadata } from "@/lib/seo";
 
 import {
   Card,
@@ -241,9 +241,9 @@ export default function AnalyticsPage() {
   );
 }
 
-export const metadata: Metadata = buildPageMetadata({
-  title: "Analytics",
-  description: "Performance insights and trends from your interview sessions.",
-  alternates: { canonical: "/dashboard/analytics" },
-  robots: { index: false, follow: true },
-});
+// export const metadata: Metadata = buildPageMetadata({
+//   title: "Analytics",
+//   description: "Performance insights and trends from your interview sessions.",
+//   alternates: { canonical: "/dashboard/analytics" },
+//   robots: { index: false, follow: true },
+// });
