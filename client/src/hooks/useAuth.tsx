@@ -24,8 +24,26 @@ interface SignupData {
   lastName: string;
   email: string;
   password: string;
+  confirmPassword: string;
+  agreeToTerms: boolean;
 }
 
+interface ApiResponse {
+  status: string;
+  message?: string;
+  data?: {
+    token: string;
+    user?: {
+      id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+    };
+  };
+}
+
+const API_URL =
+  process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:8080/api";
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -39,14 +57,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      // TODO: Check for existing authentication token/session
-      // This is where you'd verify the token with your backend
-      const savedUser = localStorage.getItem("user");
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Verify token with the server
+      const response = await fetch(`${API_URL}/auth/verify`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.status === "success") {
+          setUser(data.data.user);
+          localStorage.setItem("user", JSON.stringify(data.data.user));
+        } else {
+          // Token invalid, clear storage
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+        }
+      } else {
+        // Token verification failed, clear storage
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
       }
     } catch (error) {
       console.error("Auth check failed:", error);
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
     } finally {
       setIsLoading(false);
     }
@@ -54,52 +98,115 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      // TODO: Implement actual login API call
-      // const response = await api.login({ email, password })
+      setIsLoading(true);
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-      // Mock login for demonstration
-      const mockUser: User = {
-        id: "1",
-        email,
-        firstName: "John",
-        lastName: "Doe",
-      };
+      const data: ApiResponse = await response.json();
 
-      setUser(mockUser);
-      localStorage.setItem("user", JSON.stringify(mockUser));
-      localStorage.setItem("token", "mock-jwt-token");
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+
+      if (data.status === "success" && data.data?.token) {
+        // Decode the JWT to get user info
+        const base64Url = data.data.token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const payload = JSON.parse(window.atob(base64));
+
+        const userData: User = {
+          id: payload.userId || payload.id || "1",
+          email: payload.email,
+          firstName: payload.firstName,
+          lastName: payload.lastName,
+        };
+
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+        localStorage.setItem("token", data.data.token);
+
+        // Also set token in cookies for middleware
+        document.cookie = `token=${data.data.token}; path=/; max-age=${
+          60 * 60 * 24 * 7
+        }`; // 7 days
+
+        return;
+      }
+
+      throw new Error(data.message || "Login failed");
     } catch (error) {
       console.error("Login failed:", error);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const signup = async (data: SignupData) => {
     try {
-      // TODO: Implement actual signup API call
-      // const response = await api.signup(data)
+      setIsLoading(true);
+      const response = await fetch(`${API_URL}/auth/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
-      // Mock signup for demonstration
-      const mockUser: User = {
-        id: "1",
-        email: data.email,
-        firstName: data.firstName,
-        lastName: data.lastName,
-      };
+      const responseData: ApiResponse = await response.json();
 
-      setUser(mockUser);
-      localStorage.setItem("user", JSON.stringify(mockUser));
-      localStorage.setItem("token", "mock-jwt-token");
+      if (!response.ok) {
+        throw new Error(responseData.message || "Signup failed");
+      }
+
+      if (responseData.status === "success" && responseData.data?.token) {
+        // Decode the JWT to get user info
+        const base64Url = responseData.data.token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const payload = JSON.parse(window.atob(base64));
+
+        const userData: User = {
+          id: payload.userId || payload.id || "1",
+          email: payload.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
+        };
+
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+        localStorage.setItem("token", responseData.data.token);
+
+        // Also set token in cookies for middleware
+        document.cookie = `token=${responseData.data.token}; path=/; max-age=${
+          60 * 60 * 24 * 7
+        }`; // 7 days
+
+        return;
+      }
+
+      throw new Error(responseData.message || "Signup failed");
     } catch (error) {
       console.error("Signup failed:", error);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const logout = () => {
+    // No need to call API for logout as we're using JWT
+    // Just remove the token from localStorage and cookies
     setUser(null);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+
+    // Remove token from cookies
+    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
   };
 
   const value = {

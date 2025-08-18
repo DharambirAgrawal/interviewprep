@@ -6,6 +6,7 @@ import DefaultLayout from "./DefaultLayout";
 import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { baseMetadata, defaultViewport } from "@/lib/seo";
+import { AuthProvider } from "@/hooks/useAuth";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,7 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

@@ -29,11 +29,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 import { signupSchema, type SignupFormValues } from "@/lib/schemas/auth";
 import { ROUTES } from "@/lib/constants";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { signup } = useAuth();
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -50,28 +52,14 @@ export default function SignupPage() {
   const onSubmit = async (values: SignupFormValues) => {
     setIsLoading(true);
     try {
-      // TODO: Implement actual signup logic here
-      console.log("Signup values:", values);
-      // Simulate API call
+      // Use the auth hook to handle signup
+      await signup(values);
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/signup`,
-        {
-          method: "POST",
-          body: JSON.stringify(values),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      const data = await res.json();
-      console.log(data);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Redirect to verification page or login page after successful signup
-      // router.push('/auth/verify-email')
+      // Redirect to dashboard after successful signup
+      window.location.href = ROUTES.DASHBOARD;
     } catch (error) {
       console.error("Signup error:", error);
+      // You could add error handling UI here
     } finally {
       setIsLoading(false);
     }

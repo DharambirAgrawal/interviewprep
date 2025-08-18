@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "defaultsecret";
+const JWT_SECRET =
+  process.env.JWT_SECRET || "default_secret_key_change_in_production";
 
-export function authenticateToken(
+export async function authenticateToken(
   req: Request,
   res: Response,
   next: NextFunction
@@ -11,23 +12,28 @@ export function authenticateToken(
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1]; // Bearer <token>
 
-  if (!token) return res.status(401).json({ error: "Token missing" });
+  if (!token) {
+    return res.status(401).json({
+      status: "error",
+      message: "Authentication required",
+    });
+  }
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ error: "Invalid token" });
+    if (err) {
+      if (err.name === "TokenExpiredError") {
+        return res.status(401).json({
+          status: "error",
+          message: "Token expired",
+        });
+      }
+      return res.status(403).json({
+        status: "error",
+        message: "Invalid token",
+      });
+    }
+
     (req as any).user = user;
     next();
   });
 }
-
-// import authRoutes from './routes/auth';
-// // ... existing imports
-
-// app.use('/api/auth', authRoutes);
-
-// // Example protected route
-// import { authenticateToken } from './middleware/authMiddleware';
-
-// app.get('/api/protected', authenticateToken, (req, res) => {
-//   res.json({ message: 'You are authorized', user: (req as any).user });
-// });

@@ -29,11 +29,7 @@ import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { loginSchema, type LoginFormValues } from "@/lib/schemas/auth";
-
-// Define the schema inline to avoid import issues
-
-// // Infer the type from the schema
-// export type LoginFormValues = z.infer<typeof loginSchema>;
+import { useAuth } from "@/hooks/useAuth";
 
 // Define ROUTES constant to avoid import issues
 const ROUTES = {
@@ -43,6 +39,7 @@ const ROUTES = {
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -56,27 +53,14 @@ export default function LoginPage() {
   const onSubmit = async (values: LoginFormValues) => {
     setIsLoading(true);
     try {
-      // TODO: Implement actual login logic here
-      console.log("Login values:", values);
-      // Simulate API call
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/login`,
-        {
-          method: "POST",
-          body: JSON.stringify(values),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      const data = await res.json();
-      console.log(data);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Use the auth hook to handle login
+      await login(values.email, values.password);
 
       // Redirect to dashboard after successful login
-      // window.location.href = ROUTES.DASHBOARD;
+      window.location.href = ROUTES.DASHBOARD;
     } catch (error) {
       console.error("Login error:", error);
+      // You could add error handling UI here
     } finally {
       setIsLoading(false);
     }

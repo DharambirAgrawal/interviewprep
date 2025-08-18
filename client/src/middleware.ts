@@ -1,167 +1,136 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Define role types with hierarchy
-export type UserRole = "USER" | "AUTHOR" | "ADMIN";
+// Define public routes that don't require authentication
+const PUBLIC_ROUTES = [
+  "/",
+  "/auth/login",
+  "/auth/signup",
+  "/auth/forgot-password",
+];
 
-const AUTH_ROUTES = ["/auth/signin", "/auth/signup"];
-const REDIRECT_URL = "/dashboard/home";
-// Define role-based route permissions
-const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
-  USER: [
-    "/dashboard/home",
-    // "/dashboard/profile",
-    // "/dashboard/calendar",
-    // "/dashboard/images/upload",
-    // "/dashboard/images/gallery",
-    // "/dashboard/users",
-    // "/dashboard/posts/view",
-    // "/dashboard/posts/upload",
-    // "/dashboard/settings",
-  ],
-  AUTHOR: [
-    "/dashboard/home",
-    "/dashboard/profile",
-    "/dashboard/create-post",
-    "/dashboard/posts/upload",
-    "/dashboard/posts/view",
-    "/dashboard/images/upload",
-    "/dashboard/images/gallery",
-    "/dashboard/my-posts",
-    "/dashboard/preview/blog/*",
-    "/dashboard/course/upload/*",
-    "/dashboard/course/view",
-    "/dashboard/course/upload",
-  ],
-  ADMIN: [
-    "/dashboard/home",
-    "/dashboard/profile",
-    "/dashboard/calendar",
-    "/dashboard/images/upload",
-    "/dashboard/images/gallery",
-    "/dashboard/users",
-    "/dashboard/posts/view",
-    "/dashboard/posts/upload",
-    "/dashboard/settings",
-    "/dashboard/course/upload/*",
-    "/dashboard/course/upload",
-    "/dashboard/course/view",
-    "/dashboard/preview/blog/*",
-  ],
-};
+// Define dashboard routes that require authentication
+const PROTECTED_ROUTES = [
+  "/dashboard",
+  "/dashboard/home",
+  "/dashboard/profile",
+  "/dashboard/settings",
+  "/dashboard/create-post",
+  "/dashboard/posts/upload",
+  "/dashboard/posts/view",
+  "/dashboard/images/upload",
+  "/dashboard/images/gallery",
+  "/dashboard/my-posts",
+  "/dashboard/preview/blog",
+  "/dashboard/course/upload",
+  "/dashboard/course/view",
+  "/dashboard/calendar",
+  "/dashboard/users",
+];
 
-export async function middleware(request: NextRequest) {
-  const refreshToken = request.cookies.get("refreshToken")?.value || "";
-  const path = request.nextUrl.pathname;
-  const response = NextResponse.next();
-
-  // If the route is an auth route, check if the user is logged in already.
-  if (AUTH_ROUTES.includes(path)) {
-    if (!refreshToken) {
-      return NextResponse.next();
-    }
-    try {
-      // Attempt to validate the refresh token
-      const res = await fetch(`${process.env.SERVER_BASE_URL}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          Cookie: `refreshToken=${refreshToken}`,
-        },
-      });
-
-      const data = await res.json();
-
-      if (data.status === "success") {
-        // If refresh token is valid, redirect to the dashboard
-        return NextResponse.redirect(new URL(REDIRECT_URL, request.url));
-      }
-    } catch (error) {
-      console.error("Error validating refresh token:", error);
-      response.cookies.delete("refreshToken");
-      return response;
-    }
+// Function to parse JWT token and get user data
+function parseJwt(token: string) {
+  try {
+    // Get the payload part of the JWT
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(atob(base64));
+    return payload;
+  } catch (error) {
+    console.error("Error parsing JWT:", error);
+    return null;
   }
-
-  // If the path starts with /dashboard and no access token is present, redirect to login
-  if (path.startsWith("/dashboard")) {
-    try {
-      const getAccessToken = await fetch(
-        `${process.env.SERVER_BASE_URL}/api/auth/login`,
-        {
-          method: "POST",
-          headers: {
-            Cookie: `refreshToken=${refreshToken}`,
-          },
-        }
-      );
-
-      if (!getAccessToken.ok) {
-        throw new Error("Failed to fetch access token");
-      }
-      const data = await getAccessToken.json();
-      const cookie_string = getAccessToken.headers.get("set-cookie");
-
-      if (!cookie_string) {
-        throw new Error("No Set-Cookie header in response");
-      }
-      const accessToken = cookie_string.match(/access_token=([^;]+)/);
-      if (!accessToken) {
-        throw new Error("No access token in Set-Cookie header");
-      }
-      const { role } = data.data as { role: UserRole };
-      response.headers.set("x-role", role); // Custom header with role
-
-      response.cookies.set({
-        name: "accessToken",
-        value: accessToken[1],
-        path: "/",
-        maxAge: 24 * 3600,
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== "development", // Only secure in production
-        sameSite: "lax",
-      });
-
-      //handling roles and prermessions
-      const allowedRoutes = ROLE_PERMISSIONS[role] || [];
-
-      // if (!allowedRoutes.includes(path)) {
-      //   return NextResponse.rewrite(new URL("/404", request.url));
-      // }
-      // return NextResponse.next();
-      // Check if the path matches the allowed routes for the role
-      const isAllowedRoute = allowedRoutes.some((route) => {
-        // Match dynamic routes (e.g., /dashboard/preview/blog/[slug])
-        const regex = new RegExp(`^${route.replace("*", ".*")}$`);
-        return regex.test(path);
-      });
-
-      if (!isAllowedRoute) {
-        return NextResponse.rewrite(new URL("/404", request.url));
-      }
-      return response;
-      // return NextResponse.next();
-    } catch (error) {
-      console.error("Error validating access token:", error);
-      const response = NextResponse.redirect(
-        new URL("/auth/signin", request.url)
-      );
-      response.cookies.delete("refreshToken");
-      return response;
-    }
-    // Here you can optionally verify the access token or check for user roles, if necessary.
-  }
-
-  if (path.startsWith("/auth")) {
-    return NextResponse.next();
-  }
-  // If we reached here, it means the user is unauthenticated and trying to access a protected route.
-  return NextResponse.redirect(new URL("/auth/signin", request.url));
 }
 
-// Configure routes to be protected
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Allow requests to Next.js assets and API routes
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api") ||
+    pathname.includes(".")
+  ) {
+    return NextResponse.next();
+  }
+
+  // Check if the path is a public route
+  const isPublicRoute = PUBLIC_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(route)
+  );
+
+  // If it's a public route, allow access
+  if (isPublicRoute) {
+    // If user is already authenticated and trying to access login/signup, redirect to dashboard
+    if (pathname === "/auth/login" || pathname === "/auth/signup") {
+      const token = request.cookies.get("token")?.value;
+      if (token) {
+        try {
+          // Verify the token is valid by checking expiration
+          const payload = parseJwt(token);
+          if (payload && payload.exp && payload.exp * 1000 > Date.now()) {
+            return NextResponse.redirect(new URL("/dashboard", request.url));
+          }
+        } catch (error) {
+          // If token is invalid, continue to login page
+          console.error("Token validation error:", error);
+        }
+      }
+    }
+    return NextResponse.next();
+  }
+
+  // For protected routes, check if user is authenticated
+  const isProtectedRoute = PROTECTED_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(route)
+  );
+
+  if (isProtectedRoute) {
+    const token = request.cookies.get("token")?.value;
+
+    // If no token is present, redirect to login
+    if (!token) {
+      const url = new URL("/auth/login", request.url);
+      url.searchParams.set("from", pathname);
+      return NextResponse.redirect(url);
+    }
+
+    try {
+      // Verify the token is valid by checking expiration
+      const payload = parseJwt(token);
+
+      if (!payload || !payload.exp || payload.exp * 1000 <= Date.now()) {
+        // Token is expired or invalid, redirect to login
+        const url = new URL("/auth/login", request.url);
+        url.searchParams.set("from", pathname);
+        return NextResponse.redirect(url);
+      }
+
+      // Token is valid, allow access
+      return NextResponse.next();
+    } catch (error) {
+      console.error("Token validation error:", error);
+      const url = new URL("/auth/login", request.url);
+      url.searchParams.set("from", pathname);
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // For any other routes, default to allowing access
+  return NextResponse.next();
+}
+
+// See "Matching Paths" below to learn more
 export const config = {
   matcher: [
-    "/auth/:path*", // Authentication routes
-    "/dashboard/:path*", // Dashboard routes with role-based protection
+    /*
+     * Match all request paths except for:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - images/ files (public image files)
+     * - Any files with extensions (.js, .css, etc)
+     */
+    "/((?!_next/static|_next/image|favicon.ico|images/|.*\\.[^/]*$).*)",
   ],
 };

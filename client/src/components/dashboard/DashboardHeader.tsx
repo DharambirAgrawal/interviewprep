@@ -1,21 +1,28 @@
 "use client";
 
-import { Bell, Search, Menu } from "lucide-react";
+import { Bell, Search, Menu, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthStatus } from "@/components/auth/AuthStatus";
-// import { useAuth } from "@/hooks/useAuth" // Uncomment when auth is implemented
+import { useAuth } from "@/hooks/useAuth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
 
 export function DashboardHeader() {
-  // const { user, logout } = useAuth() // Uncomment when auth is implemented
+  const { user, logout } = useAuth();
+  const router = useRouter();
 
-  // Mock user for now
-  const mockUser = {
-    id: "1",
-    email: "john.doe@example.com",
-    firstName: "John",
-    lastName: "Doe",
-    avatar: "",
+  const handleLogout = () => {
+    logout();
+    router.push("/auth/login");
   };
 
   return (
@@ -57,13 +64,41 @@ export function DashboardHeader() {
           <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200 dark:lg:bg-gray-700" />
 
           {/* Profile dropdown */}
-          <AuthStatus
-            user={mockUser}
-            onLogout={() => {
-              // logout() // Uncomment when auth is implemented
-              console.log("Logout clicked");
-            }}
-          />
+          {user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="relative h-8 w-8 rounded-full"
+                >
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage
+                      src={user.avatar}
+                      alt={`${user.firstName} ${user.lastName}`}
+                    />
+                    <AvatarFallback>{`${user.firstName.charAt(
+                      0
+                    )}${user.lastName.charAt(0)}`}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{`${user.firstName} ${user.lastName}`}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
     </div>

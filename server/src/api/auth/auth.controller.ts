@@ -12,12 +12,8 @@ import {
   hashData,
 } from "@utils/utils";
 import { AppError } from "@errors/AppError";
-import { sendEmail } from "services/emailService";
-import { FORGET_PASSWORD_MESSAGE } from "@utils/EmailMessages";
 
-
-
-//    Signup
+// Signup
 export const signup = async (req: Request, res: Response) => {
   try {
     validateRequiredFields(
@@ -45,7 +41,7 @@ export const signup = async (req: Request, res: Response) => {
     }
 
     const passwordHash = await hashData(password);
-    await db
+    const newUser = await db
       .insert(users)
       .values({
         firstName,
@@ -55,17 +51,36 @@ export const signup = async (req: Request, res: Response) => {
       })
       .returning();
 
-    const payload = { email };
-    const options: SignOptions = {
-      expiresIn: process.env.TOKEN_EXPIRY as jwt.SignOptions["expiresIn"],
+    const payload = {
+      email,
+      firstName,
+      lastName,
+      userId: newUser[0].userId,
     };
+
+    const options: SignOptions = {
+      expiresIn:
+        (process.env.TOKEN_EXPIRY as jwt.SignOptions["expiresIn"]) || "24h",
+    };
+
     const token = jwt.sign(
       payload,
-      process.env.JWT_SECRET || "default",
+      process.env.JWT_SECRET || "default_secret_key_change_in_production",
       options
     );
 
-    res.status(201).json({ status: "success", data: { token } });
+    res.status(201).json({
+      status: "success",
+      data: {
+        token,
+        user: {
+          id: newUser[0].userId,
+          email: newUser[0].email,
+          firstName: newUser[0].firstName,
+          lastName: newUser[0].lastName,
+        },
+      },
+    });
   } catch (err) {
     if (err instanceof AppError) {
       return res
@@ -77,7 +92,7 @@ export const signup = async (req: Request, res: Response) => {
   }
 };
 
-//    login
+// Login
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
@@ -94,6 +109,7 @@ export const login = async (req: Request, res: Response) => {
       .from(users)
       .where(eq(users.email, email))
       .limit(1);
+
     if (!user || user.length === 0) {
       return res.status(401).json({
         status: "error",
@@ -114,13 +130,32 @@ export const login = async (req: Request, res: Response) => {
       email: dbUser.email,
       firstName: dbUser.firstName,
       lastName: dbUser.lastName,
+      userId: dbUser.userId,
     };
-    const options: SignOptions = {
-      expiresIn: process.env.TOKEN_EXPIRY as jwt.SignOptions["expiresIn"],
-    };
-    const token = jwt.sign(payload, process.env.JWT_SECRET || "123", options);
 
-    return res.status(200).json({ status: "success", data: { token } });
+    const options: SignOptions = {
+      expiresIn:
+        (process.env.TOKEN_EXPIRY as jwt.SignOptions["expiresIn"]) || "24h",
+    };
+
+    const token = jwt.sign(
+      payload,
+      process.env.JWT_SECRET || "default_secret_key_change_in_production",
+      options
+    );
+
+    return res.status(200).json({
+      status: "success",
+      data: {
+        token,
+        user: {
+          id: dbUser.userId,
+          email: dbUser.email,
+          firstName: dbUser.firstName,
+          lastName: dbUser.lastName,
+        },
+      },
+    });
   } catch (err) {
     console.error("Login error:", err);
     return res
@@ -129,6 +164,56 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-// logout
+// Verify Token
+export const verifyToken = async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
 
-// forgot password
+    if (!user || !user.email) {
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid token",
+      });
+    }
+
+    const dbUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, user.email))
+      .limit(1);
+
+    if (!dbUser || dbUser.length === 0) {
+      return res.status(401).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      data: {
+        user: {
+          id: dbUser[0].userId,
+          email: dbUser[0].email,
+          firstName: dbUser[0].firstName,
+          lastName: dbUser[0].lastName,
+        },
+      },
+    });
+  } catch (err) {
+    console.error("Token verification error:", err);
+    return res
+      .status(500)
+      .json({ status: "error", message: "Internal server error" });
+  }
+};
+
+// Optional: Logout - placeholder (JWT is stateless)
+export const logout = (_req: Request, res: Response) => {
+  // In JWT, logout can be handled on client-side by deleting token.
+  // To invalidate server-side, implement token blacklisting (e.g., Redis).
+  return res.status(200).json({
+    status: "success",
+    message: "Logged out successfully (client should delete the token)",
+  });
+};
