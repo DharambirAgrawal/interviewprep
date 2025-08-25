@@ -12,7 +12,7 @@ const routes = (app: Application): void => {
   // Example route using the upload middleware
 
   app.get("/", (req: Request, res: Response) => {
-    res.send("Hello World");
+    res.send("Welcome to Home page");
   });
   app.get("/health", async (req: Request, res: Response) => {
     // res.status(200).send("OK");
