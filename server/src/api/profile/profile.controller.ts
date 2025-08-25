@@ -6,6 +6,17 @@ import { catchAsync } from "../../errors/catchAsync";
 import { AppError } from "../../errors/AppError";
 import { z } from "zod";
 
+// Extend Express Request type to include user property
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        userId: string;
+      };
+    }
+  }
+}
+
 // Validation schema for profile data
 const profileSchema = z.object({
   jobTitle: z.string().optional(),
