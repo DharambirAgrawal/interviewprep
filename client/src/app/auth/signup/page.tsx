@@ -30,12 +30,14 @@ import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 import { signupSchema, type SignupFormValues } from "@/lib/schemas/auth";
 import { ROUTES } from "@/lib/constants";
 import { useAuth } from "@/hooks/useAuth";
+import { useToastNotifications } from "@/hooks/useToast";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { signup } = useAuth();
+  const toast = useToastNotifications();
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -59,7 +61,7 @@ export default function SignupPage() {
       window.location.href = ROUTES.DASHBOARD;
     } catch (error) {
       console.error("Signup error:", error);
-      // You could add error handling UI here
+      // Toast notification is already shown by useAuth hook
     } finally {
       setIsLoading(false);
     }

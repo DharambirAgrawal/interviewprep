@@ -26,6 +26,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Mail, CheckCircle } from "lucide-react";
+import { useToastNotifications } from "@/hooks/useToast";
+import { useToastMessages } from "@/lib/toastMessages";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -36,6 +38,8 @@ type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const toast = useToastNotifications();
+  const toastMessages = useToastMessages();
 
   const form = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -64,9 +68,15 @@ export default function ForgotPasswordPage() {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
+      toastMessages.auth.passwordResetEmailSent(values.email);
       setIsSubmitted(true);
     } catch (error) {
       console.error("Forgot password error:", error);
+      toastMessages.auth.loginError(
+        error instanceof Error
+          ? error.message
+          : "There was an error sending the reset link. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }

@@ -30,6 +30,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { loginSchema, type LoginFormValues } from "@/lib/schemas/auth";
 import { useAuth } from "@/hooks/useAuth";
+import { useToastNotifications } from "@/hooks/useToast";
 
 // Define ROUTES constant to avoid import issues
 const ROUTES = {
@@ -40,6 +41,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
+  const toast = useToastNotifications();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -60,7 +62,7 @@ export default function LoginPage() {
       window.location.href = ROUTES.DASHBOARD;
     } catch (error) {
       console.error("Login error:", error);
-      // You could add error handling UI here
+      // Toast notification is already shown by useAuth hook
     } finally {
       setIsLoading(false);
     }

@@ -1,6 +1,8 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { useToastNotifications } from "./useToast";
+import { useToastMessages } from "@/lib/toastMessages";
 
 interface User {
   id: string;
@@ -49,6 +51,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const toast = useToastNotifications();
+  const toastMessages = useToastMessages();
 
   useEffect(() => {
     // Check for existing session on mount
@@ -110,6 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data: ApiResponse = await response.json();
 
       if (!response.ok) {
+        toastMessages.auth.loginError(data.message);
         throw new Error(data.message || "Login failed");
       }
 
@@ -135,12 +140,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           60 * 60 * 24 * 7
         }`; // 7 days
 
+        toastMessages.auth.loginSuccess(
+          `${userData.firstName} ${userData.lastName}`
+        );
         return;
       }
 
-      throw new Error(data.message || "Login failed");
+      // If we reach here, it means we have a success response but no token
+      toastMessages.auth.loginError("Invalid response from server");
+      throw new Error("Login failed: Invalid response from server");
     } catch (error) {
       console.error("Login failed:", error);
+      // Don't show another toast here - we already showed one above
       throw error;
     } finally {
       setIsLoading(false);
@@ -161,6 +172,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const responseData: ApiResponse = await response.json();
 
       if (!response.ok) {
+        toastMessages.auth.signupError(responseData.message);
         throw new Error(responseData.message || "Signup failed");
       }
 
@@ -186,12 +198,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           60 * 60 * 24 * 7
         }`; // 7 days
 
+        toastMessages.auth.signupSuccess(
+          `${userData.firstName} ${userData.lastName}`
+        );
         return;
       }
 
-      throw new Error(responseData.message || "Signup failed");
+      // If we reach here, it means we have a success response but no token
+      toastMessages.auth.signupError("Invalid response from server");
+      throw new Error("Signup failed: Invalid response from server");
     } catch (error) {
       console.error("Signup failed:", error);
+      // Don't show another toast here - we already showed one above
       throw error;
     } finally {
       setIsLoading(false);
@@ -201,12 +219,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     // No need to call API for logout as we're using JWT
     // Just remove the token from localStorage and cookies
+    const firstName = user?.firstName || "";
     setUser(null);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
 
     // Remove token from cookies
     document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
+    toastMessages.auth.logoutSuccess();
   };
 
   const value = {
