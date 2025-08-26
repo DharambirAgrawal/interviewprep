@@ -7,7 +7,12 @@ import {
   timestamp,
   uuid,
   integer,
+  pgEnum,
 } from "drizzle-orm/pg-core";
+
+export const interview_difficulty_enum = pgEnum("interview_difficulty_enum", ["easy", "medium", "hard"])
+export const interview_type_enum = pgEnum("interview_type_enum", ["technical", "hr", "managerial", "behavioral"])
+export const interview_style_enum = pgEnum("interview_style_enum", ["in-person", "virtual", "panel", "one-on-one"])
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -25,22 +30,30 @@ export const users = pgTable("users", {
 
 export const profiles = pgTable("profiles", {
   id: serial("id").primaryKey(),
+
   userId: uuid("user_id")
     .notNull()
     .references(() => users.userId)
     .unique(),
+
   jobTitle: varchar("job_title", { length: 200 }),
   company: varchar("company", { length: 200 }),
   bio: text("bio"),
+
   profileImageUrl: text("profile_image_url"),
   resumeUrl: text("resume_url"),
+
   targetIndustry: varchar("target_industry", { length: 100 }),
-  interviewDifficulty: varchar("interview_difficulty", { length: 50 }),
-  interviewType: varchar("interview_type", { length: 50 }),
-  interviewStyle: varchar("interview_style", { length: 50 }),
+
+  interviewDifficulty: interview_difficulty_enum("interview_difficulty"),
+  interviewType: interview_type_enum("interview_type"),
+  interviewStyle: interview_style_enum("interview_style"),
+
   primarySkills: text("primary_skills"),
   weakAreas: text("weak_areas"),
+
   interviewComfortLevel: integer("interview_comfort_level"),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
