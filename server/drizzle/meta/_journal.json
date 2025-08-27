@@ -8,6 +8,27 @@
       "when": 1755497481594,
       "tag": "0000_perfect_madelyne_pryor",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1756312819495,
+      "tag": "0001_slimy_moon_knight",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1756313301378,
+      "tag": "0002_modern_proudstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1756313500562,
+      "tag": "0003_secret_the_anarchist",
+      "breakpoints": true
     }
   ]
 }

@@ -10,9 +10,9 @@ import {
   pgEnum,
 } from "drizzle-orm/pg-core";
 
-export const interview_difficulty_enum = pgEnum("interview_difficulty_enum", ["easy", "medium", "hard"])
-export const interview_type_enum = pgEnum("interview_type_enum", ["technical", "hr", "managerial", "behavioral"])
-export const interview_style_enum = pgEnum("interview_style_enum", ["in-person", "virtual", "panel", "one-on-one"])
+export const interview_difficulty_enum = pgEnum("interview_difficulty_enum", ["beginner", "intermediate", "advanced","expert"])
+export const interview_type_enum = pgEnum("interview_type_enum", ["technical", "hr", "managerial", "behavioral", "system_design","case_study","mixed"])
+export const interview_style_enum = pgEnum("interview_style_enum", ["traditional", "conversational", "problem_solving", "pair_programming","whiteboard"])
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),

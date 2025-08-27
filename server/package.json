@@ -14,7 +14,8 @@
   "scripts": {
     "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/index.ts",
     "build": "tsc",
-    "start": "node -r module-alias/register dist/index.js"
+    "start": "node -r module-alias/register dist/index.js",
+    "db:push": "drizzle-kit push --config=drizzle.config.ts"
   },
   "keywords": [],
   "author": "",
