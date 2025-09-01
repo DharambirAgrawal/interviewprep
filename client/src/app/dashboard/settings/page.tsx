@@ -35,7 +35,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Bell, Shield, Palette, Upload, X } from "lucide-react";
-
+import { authService } from "../../../lib/auth/authService";
 import {
   INDUSTRIES,
   DIFFICULTY_LEVELS,
@@ -135,8 +135,12 @@ export default function SettingsPage() {
       try {
         setIsLoading(true);
 
+        const userData = authService.getUser();
+        const user = userData ? JSON.parse(userData) : null;
+        const userId = user?.id || "";
+
         // Fetch profile data from API
-        const data: ProfileData = await getUserProfile();
+        const data: ProfileData = await getUserProfile(userId);
 
         // Set profile image if available
         if (data.profile?.profileImageUrl) {
@@ -203,7 +207,14 @@ export default function SettingsPage() {
   const onProfileSubmit = async (values: any) => {
     setIsLoading(true);
     try {
-      console.log("Profile values:", values);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/profile`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${authService.getToken()}`,
+        },
+      });
+      console.log("Profile values are:", values);
+      console.log(authService.getUser());
 
       // First, handle file uploads if any
       let uploadedFileUrls: any = {};

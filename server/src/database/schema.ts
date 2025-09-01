@@ -9,10 +9,29 @@ import {
   integer,
   pgEnum,
 } from "drizzle-orm/pg-core";
-
-export const interview_difficulty_enum = pgEnum("interview_difficulty_enum", ["beginner", "intermediate", "advanced","expert"])
-export const interview_type_enum = pgEnum("interview_type_enum", ["technical", "hr", "managerial", "behavioral", "system_design","case_study","mixed"])
-export const interview_style_enum = pgEnum("interview_style_enum", ["traditional", "conversational", "problem_solving", "pair_programming","whiteboard"])
+import { jsonb } from "drizzle-orm/pg-core";
+export const interview_difficulty_enum = pgEnum("interview_difficulty_enum", [
+  "beginner",
+  "intermediate",
+  "advanced",
+  "expert",
+]);
+export const interview_type_enum = pgEnum("interview_type_enum", [
+  "technical",
+  "hr",
+  "managerial",
+  "behavioral",
+  "system_design",
+  "case_study",
+  "mixed",
+]);
+export const interview_style_enum = pgEnum("interview_style_enum", [
+  "traditional",
+  "conversational",
+  "problem_solving",
+  "pair_programming",
+  "whiteboard",
+]);
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -40,8 +59,8 @@ export const profiles = pgTable("profiles", {
   company: varchar("company", { length: 200 }),
   bio: text("bio"),
 
-  profileImageUrl: text("profile_image_url"),
-  resumeUrl: text("resume_url"),
+  profileImage: jsonb("profile_image"),
+  resume: jsonb("resume"),
 
   targetIndustry: varchar("target_industry", { length: 100 }),
 
@@ -53,7 +72,19 @@ export const profiles = pgTable("profiles", {
   weakAreas: text("weak_areas"),
 
   interviewComfortLevel: integer("interview_comfort_level"),
+  summary: text("summary"),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+// Note: the resume will store
+// {
+//   name: string;
+//   content: string;
+// }
+// Note: the resume will store
+// {
+//   name: string;
+//   content: string;
+// }

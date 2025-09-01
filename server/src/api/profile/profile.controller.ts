@@ -5,25 +5,14 @@ import { eq } from "drizzle-orm";
 import { catchAsync } from "../../errors/catchAsync";
 import { AppError } from "../../errors/AppError";
 import { z } from "zod";
-
-// Extend Express Request type to include user property
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        userId: string;
-      };
-    }
-  }
-}
-
+import { createProfile } from "../auth/auth.middleware";
 // Validation schema for profile data
 const profileSchema = z.object({
   jobTitle: z.string().optional(),
   company: z.string().optional(),
   bio: z.string().max(500).optional(),
-  profileImageUrl: z.string().url().optional(),
-  resumeUrl: z.string().url().optional(),
+  profileImage: z.string().optional(),
+  resume: z.string().optional(),
   targetIndustry: z.string().optional(),
   interviewDifficulty: z
     .enum(["beginner", "intermediate", "advanced", "expert"])
@@ -46,7 +35,7 @@ const profileSchema = z.object({
 });
 
 export const getProfile = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user?.userId;
+  const userId = req.params.id;
 
   if (!userId) {
     throw new AppError("User not authenticated", 401);
@@ -76,7 +65,20 @@ export const getProfile = catchAsync(async (req: Request, res: Response) => {
       .where(eq(profiles.userId, userId))
       .limit(1);
 
-    const profileData = profile.length > 0 ? profile[0] : null;
+    let profileData = profile.length > 0 ? profile[0] : null;
+
+    // if not creating profile
+    if (!profileData) {
+      const createProfileResult = await createProfile(userId);
+
+      if (!createProfileResult.success) {
+        throw new AppError("Failed to create user profile", 500);
+      }
+      profileData =
+        createProfileResult.data && createProfileResult.data.length > 0
+          ? createProfileResult.data[0]
+          : null;
+    }
 
     // Combine user and profile data
     const responseData = {
@@ -86,8 +88,8 @@ export const getProfile = catchAsync(async (req: Request, res: Response) => {
             jobTitle: profileData.jobTitle,
             company: profileData.company,
             bio: profileData.bio,
-            profileImageUrl: profileData.profileImageUrl,
-            resumeUrl: profileData.resumeUrl,
+            profileImage: profileData.profileImage,
+            resume: profileData.resume,
             targetIndustry: profileData.targetIndustry,
             interviewDifficulty: profileData.interviewDifficulty,
             interviewType: profileData.interviewType,
@@ -112,7 +114,8 @@ export const getProfile = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const updateProfile = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user?.userId;
+  const userId = req.params.id;
+  const profile = req.body;
 
   if (!userId) {
     throw new AppError("User not authenticated", 401);
@@ -120,7 +123,7 @@ export const updateProfile = catchAsync(async (req: Request, res: Response) => {
 
   try {
     // Validate the request body
-    const validationResult = profileSchema.safeParse(req.body);
+    const validationResult = profileSchema.safeParse(profile);
 
     if (!validationResult.success) {
       throw new AppError("Invalid profile data", 400);
@@ -185,7 +188,7 @@ export const updateProfile = catchAsync(async (req: Request, res: Response) => {
 
 export const updateBasicInfo = catchAsync(
   async (req: Request, res: Response) => {
-    const userId = req.user?.userId;
+    const userId = req.params.id;
 
     if (!userId) {
       throw new AppError("User not authenticated", 401);
@@ -253,7 +256,7 @@ export const updateBasicInfo = catchAsync(
 );
 
 export const deleteProfile = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user?.userId;
+  const userId = req.params.id;
 
   if (!userId) {
     throw new AppError("User not authenticated", 401);

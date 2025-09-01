@@ -4,7 +4,7 @@ import jwt, { SignOptions } from "jsonwebtoken";
 import { db } from "../../database/index";
 import { users } from "../../database/schema";
 import { eq } from "drizzle-orm";
-
+import { createProfile } from "./auth.middleware";
 import {
   validateAndNormalizeEmail,
   validatePassword,
@@ -50,6 +50,14 @@ export const signup = async (req: Request, res: Response) => {
         password: passwordHash,
       })
       .returning();
+
+    // creating profile
+
+    const createProfileResult = await createProfile(newUser[0].userId);
+
+    if (!createProfileResult.success) {
+      throw new AppError("Failed to create user profile", 500);
+    }
 
     const payload = {
       email,

@@ -1,6 +1,6 @@
 // Profile API service
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
 
 export interface ProfileData {
   userId: string;
@@ -64,8 +64,8 @@ const getAuthHeaders = (): Record<string, string> => {
 };
 
 // Get user profile
-export const getUserProfile = async (): Promise<ProfileData> => {
-  const response = await fetch(`${API_BASE_URL}/profile`, {
+export const getUserProfile = async (id: string): Promise<ProfileData> => {
+  const response = await fetch(`${API_BASE_URL}/profile/${id}`, {
     method: "GET",
     headers: getAuthHeaders(),
   });
