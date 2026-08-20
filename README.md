@@ -1,142 +1,69 @@
-# Interview Application
+# Interview Prep
 
-A full-stack interview platform built with Next.js (client) and Express.js (server), featuring AI-powered interview questions and resume parsing capabilities.
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-Python-000000?logo=flask&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Drizzle_ORM-4169E1?logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 
-## 🏗️ Project Structure
+A mock-interview platform with a webcam-based session UI, an in-browser code editor with real code execution, and backend services for resume parsing and speech-to-text.
 
-```
-interview/
-├── client/                 # Next.js frontend application
-├── server/                 # Express.js backend API
-├── python-server/          # Python API for AI features
-├── docker-compose.yml      # Docker orchestration
-└── .github/workflows/      # CI/CD pipeline
-```
+## Overview
 
-## 🚀 Quick Start
+Interview Prep simulates a technical interview: candidates join a session with a live webcam feed, answer audio-delivered questions, and solve coding problems in an in-browser Monaco editor that compiles and runs against a real judge. The system is split into three services — a Next.js frontend, an Express/TypeScript API, and a Python microservice — connected through Docker Compose and deployed via a path-aware GitHub Actions pipeline.
+
+The project is under active development. Authentication, resume parsing, speech-to-text, and code execution are wired end-to-end; the AI interview-question generation endpoint exists but is currently disabled server-side, and the interview session flow still runs on mock question data on the frontend while that integration is finished.
+
+## Features
+
+- **JWT authentication** — signup/login with bcrypt password hashing, rate-limited login attempts, and token verification middleware (Express + Drizzle/Postgres)
+- **In-browser code execution** — Monaco-based editor supporting multiple languages, compiled and run remotely via the Judge0 API
+- **Resume parsing** — extracts text from PDF and DOCX resumes (PyMuPDF / python-docx) through a dedicated Flask endpoint
+- **Speech-to-text transcription** — audio responses transcribed with OpenAI Whisper on the Python service
+- **Webcam-enabled interview UI** — a video-call-style interface (`getUserMedia`) with an audio question player, progress tracking, and a dashboard/analytics shell
+- **Dockerized deployment** — `docker-compose.yml` orchestrates the Express server and a Postgres 14 database, with a CI/CD pipeline that path-filters changes and ships the server to Heroku on merge to `main`
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 15, React 19, TypeScript, Tailwind CSS 4, Radix UI, Monaco Editor |
+| API server | Express 5, TypeScript, Drizzle ORM, PostgreSQL, JWT, bcrypt |
+| AI/microservice | Python, Flask, OpenAI Whisper, PyMuPDF, python-docx |
+| Infra | Docker & Docker Compose, GitHub Actions, Heroku (server) |
+
+## How it works
+
+The Express API doesn't do AI/media work itself — it acts as a gateway that proxies requests to the Python service (audio transcription, resume parsing) and to Judge0 (code compilation), keeping those API keys off the client. Drizzle ORM manages the Postgres schema (`users`, `profiles`, interview-type/style/difficulty enums) and is pushed to the database with `drizzle-kit`. The GitHub Actions workflow uses `dorny/paths-filter` so it only rebuilds and redeploys the services actually touched by a given push.
+
+## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
 - Python 3.8+
 - Docker & Docker Compose
-- Git
+- PostgreSQL (or use the bundled Docker container)
 
-### 1. Clone the Repository
+### Clone
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/DharambirAgrawal/interviewprep.git
 cd interviewprep
 ```
 
-### 2. Environment Setup
-
-#### Client Environment Variables
-
-Create `client/.env` file:
-
-```env
-# Next.js Configuration
-NEXT_PUBLIC_API_URL=http://localhost:5000
-NEXT_PUBLIC_PYTHON_API_URL=http://localhost:8000
-
-# Database (if using client-side connections)
-DATABASE_URL=your_database_url
-
-# External APIs
-NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
-```
-
-#### Server Environment Variables
-
-Create `server/.env` file:
-
-```env
-# Server Configuration
-PORT=5000
-NODE_ENV=development
-
-# Database Connection
-# For local Dockerized Postgres, use:
-DB_HOST=db
-DB_PORT=5432
-DB_NAME=interview_db
-DB_USER=postgres
-DB_PASSWORD=postgres
-
-# For external DB, override these variables accordingly:
-# DB_HOST=your.external.db.host
-# DB_PORT=5432
-# DB_NAME=yourdbname
-# DB_USER=youruser
-# DB_PASSWORD=yourpassword
-
-# JWT & Authentication
-JWT_SECRET=your_super_secure_jwt_secret
-JWT_EXPIRES_IN=7d
-
-# External APIs
-GEMINI_API_KEY=your_gemini_api_key
-
-# CORS
-ALLOWED_ORIGINS=http://localhost:3000,https://your-domain.com
-```
-
-#### Python Server Environment Variables
-
-Create `python-server/.env` file:
-
-```env
-# Python Server Configuration
-PORT=8000
-FLASK_ENV=development
-
-# AI/ML APIs
-GEMINI_API_KEY=your_gemini_api_key
-OPENAI_API_KEY=your_openai_api_key
-
-# File Upload
-MAX_FILE_SIZE=10MB
-UPLOAD_DIR=./uploads
-```
-
-### 3. Installation & Setup
-
-#### Using Docker (Recommended)
+### Run with Docker
 
 ```bash
-# Build and start all services
 docker-compose up --build
-
-# Start in detached mode
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
 ```
-#### Using Docker with External Database
-If you want to connect the backend server to an external Postgres instance instead of running the Postgres container:
 
-- Do not start the db service.
-- Set database environment variables to your external DB:
+This starts the Express server (`:8080`) and a Postgres 14 database. The client and Python service currently run separately (see below).
 
-Example command to run only the server with external DB connection:
+### Run manually
 
-```bash
-DB_HOST=your.external.db.host \
-DB_PORT=5432 \
-DB_USER=youruser \
-DB_PASSWORD=yourpassword \
-DB_NAME=yourdbname \
-docker-compose up -d server
-
-```
-> ⚠️ When using an external database, make sure **NOT** to start the `db` service to avoid conflicts.
-
-
-#### Manual Setup
-
-##### Client Setup
+**Client** (Next.js, port 3000)
 
 ```bash
 cd client
@@ -144,196 +71,45 @@ npm install
 npm run dev
 ```
 
-##### Server Setup
+**Server** (Express, port 8080 by default)
 
 ```bash
 cd server
 npm install
-npm run dev
+npm run dev        # ts-node-dev
+npm run db:push    # push the Drizzle schema to Postgres
 ```
 
-##### Python Server Setup
+**Python service** (Flask, port 5328)
 
 ```bash
 cd python-server
 pip install -r requirements.txt
-python main.py
+python api/index.py
 ```
 
-## 📋 Available Scripts
+### Environment variables
 
-### Client (Next.js)
+Each service reads its own `.env` file (none are committed — create them locally):
 
-```bash
-cd client
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
-npm run type-check   # TypeScript type checking
+- `client/.env` — `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_PYTHON_API_URL`
+- `server/.env` — `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `JWT_SECRET`, `TOKEN_EXPIRY`, `PYTHON_API_URL`, `PYTHON_API_SECRET`, `JUDGE0_API_KEY`, `JUDGE0_API_URL`
+- `python-server/.env` — `SOME_SECRET` and any AI/ML API keys the enabled features need
+
+## Usage
+
+1. Start Postgres, the Express server, and the Python service.
+2. Run the client and sign up for an account (`/auth/signup`).
+3. From the dashboard, start an interview session to reach the webcam/audio session UI.
+4. Use the in-browser editor for coding questions — submissions are compiled and executed through the Judge0 proxy at `POST /api/service/code-compile`.
+
+## Project Structure
+
 ```
-
-### Server (Express.js)
-
-```bash
-cd server
-npm run dev          # Start development server with nodemon
-npm run build        # Compile TypeScript
-npm run start        # Start production server
-npm run test         # Run tests
+interviewprep/
+├── client/          # Next.js frontend (App Router, auth, dashboard, interview UI)
+├── server/          # Express + TypeScript API (auth, profiles, service proxy)
+├── python-server/   # Flask service (resume parsing, Whisper transcription)
+├── docker-compose.yml
+└── .github/workflows/ci-cd.yml
 ```
-
-### Python Server
-
-```bash
-cd python-server
-python main.py       # Start Flask development server
-python -m pytest    # Run tests
-```
-
-## 🔧 Configuration
-
-### Docker Configuration
-
-The project uses Docker Compose for orchestration. Key services:
-
-- **Client**: Next.js app (Port 3000)
-- **Server**: Express.js API (Port 5000)
-- **Python Server**: Flask API (Port 8000)
-- **Database**: PostgreSQL (Port 5432)
-
-### Database Setup
-
-1. Create a PostgreSQL database
-2. Update connection strings in environment files
-3. Run migrations:
-
-```bash
-cd server
-npm run migrate
-```
-
-## 🚀 Deployment
-
-### Heroku Deployment (Server)
-
-The server is configured for Heroku deployment via the [CI/CD pipeline](.github/workflows/ci-cd.yml).
-
-Required Heroku environment variables:
-
-```env
-HEROKU_API_KEY=your_heroku_api_key
-HEROKU_APP_NAME=your_app_name
-```
-
-### Vercel Deployment (Client)
-
-The client can be deployed to Vercel:
-
-Required Vercel environment variables:
-
-```env
-VERCEL_TOKEN=your_vercel_token
-VERCEL_ORG_ID=your_org_id
-VERCEL_PROJECT_ID=your_project_id
-```
-
-## 🔄 CI/CD Pipeline
-
-The project uses GitHub Actions for automated testing and deployment:
-
-- **Triggers**: Push/PR to main branch
-- **Path Detection**: Only builds changed services
-- **Server**: Builds Docker image and deploys to Heroku
-- **Client**: Builds and deploys to Vercel
-- **Testing**: Automated health checks
-
-## 📚 API Documentation
-
-### Server Endpoints
-
-- `GET /health` - Health check
-- `POST /api/auth/login` - User authentication
-- `GET /api/users` - User management
-- `POST /api/interviews` - Interview creation
-
-### Python API Endpoints
-
-- `POST /api/questions/generate` - Generate AI questions
-- `POST /api/resume/parse` - Parse resume files
-- `POST /api/speech/transcribe` - Speech-to-text
-
-## 🛠️ Development
-
-### Code Structure
-
-#### Client ([client/](client/))
-
-- `src/app/` - Next.js App Router pages
-- `src/components/` - Reusable React components
-- `src/lib/` - Utility functions and configurations
-
-#### Server ([server/src/](server/src/))
-
-- `app.ts` - Express application setup
-- `routes.ts` - API route definitions
-- `database/` - Database models and migrations
-- `middlewares/` - Custom middleware functions
-
-### Key Features
-
-- 🤖 AI-powered interview question generation
-- 📄 Resume parsing and analysis
-- 🎙️ Speech-to-text capabilities
-- 👥 User authentication and management
-- 📊 Interview analytics and reporting
-
-## 🧪 Testing
-
-```bash
-# Run all tests
-npm run test
-
-# Run client tests
-cd client && npm run test
-
-# Run server tests
-cd server && npm run test
-
-# Run Python tests
-cd python-server && python -m pytest
-```
-
-## 🔒 Security
-
-- JWT-based authentication
-- Environment variable protection
-- CORS configuration
-- Input validation and sanitization
-- Rate limiting
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License.
-
-## 🆘 Support
-
-For support and questions:
-
-- Create an issue in the repository
-- Check the [CI/CD pipeline](.github/workflows/ci-cd.yml) for deployment status
-- Review logs: `docker-compose logs -f`
-
-## 🔗 Live URLs
-
-- **Client**: https://your-client-url.vercel.app
-- **Server**: https://your-server-app.herokuapp.com
-- **Health Check**: https://your-server-app.herokuapp.com/health
